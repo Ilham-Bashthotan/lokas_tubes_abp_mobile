@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mobile Wireframe</title>
+  <style>
+    :root {
+      --bg: #f5f5f5;
+      --surface: #fff;
+      --line: #cfcfcf;
+      --text: #1f1f1f;
+      --muted: #666;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font: 12px/1.4 Arial, Helvetica, sans-serif;
+      color: var(--text);
+      background: var(--bg);
+    }
+
+    .outer {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 16px 0;
+      gap: 16px;
+    }
+
+    .nav-pills {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      justify-content: center;
+      padding: 0 12px;
+    }
+
+    .pill {
+      padding: 6px 10px;
+      border: 1px solid var(--line);
+      border-radius: 2px;
+      background: #fff;
+      color: #222;
+      font-size: 10px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .pill.on {
+      background: #fafafa;
+      border-color: #888;
+    }
+
+    .screen-wrap {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      border-radius: 16px;
+    }
+
+    .screen-label {
+      font-size: 10px;
+      color: var(--muted);
+      margin-bottom: 12px;
+      text-align: center;
+      text-transform: uppercase;
+    }
+
+    .phone {
+      width: 320px;
+      height: 640px;
+      border: 2px solid var(--text);
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
+      border-radius: 28px;
+      overflow: hidden;
+    }
+
+    .status-bar {
+      height: 20px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 12px;
+      flex-shrink: 0;
+    }
+
+    .sb-txt {
+      font-size: 9px;
+      color: var(--muted);
+    }
+
+    .screen {
+      display: none;
+      flex-direction: column;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .screen.on {
+      display: flex;
+    }
+
+    .topbar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--line);
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .topbar-title {
+      font-size: 14px;
+      font-weight: 700;
+      flex: 1;
+      color: var(--text);
+    }
+
+    .back-btn {
+      font-size: 11px;
+      color: var(--muted);
+      padding: 4px 6px;
+      cursor: pointer;
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 2px;
+    }
+
+    .body {
+      flex: 1;
+      padding: 14px;
+      overflow-y: auto;
+    }
+
+    .bottomnav {
+      height: 52px;
+      border-top: 1px solid var(--line);
+      display: flex;
+      background: var(--surface);
+      flex-shrink: 0;
+    }
+
+    .bnav-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      cursor: pointer;
+    }
+
+    .bnav-icon {
+      width: 18px;
+      height: 18px;
+      border: 1.5px solid var(--muted);
+      border-radius: 2px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: bold;
+      color: var(--muted);
+    }
+
+    .bnav-icon.circle {
+      border-radius: 50%;
+    }
+
+    .bnav-txt {
+      font-size: 9px;
+      color: var(--muted);
+    }
+
+    .bnav-item.on .bnav-icon {
+      border-color: var(--text);
+      color: var(--text);
+    }
+
+    .bnav-item.on .bnav-txt {
+      color: var(--text);
+      font-weight: 700;
+    }
+
+    .wf-box {
+      border: 1px solid var(--line);
+      padding: 8px 10px;
+      margin-bottom: 8px;
+      background: var(--surface);
+    }
+
+    .wf-label {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 10px;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+
+    .wf-val {
+      font-size: 12px;
+      color: var(--text);
+    }
+
+    .wf-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 8px 10px;
+      border: 1px solid var(--line);
+      border-radius: 2px;
+      background: #fff;
+      color: #111;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      margin-bottom: 8px;
+    }
+
+    .wf-btn.primary {
+      border-color: #888;
+      background: #fafafa;
+    }
+
+    .wf-input {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid var(--line);
+      border-radius: 2px;
+      background: #fff;
+      color: #111;
+      font-size: 12px;
+      margin-bottom: 10px;
+    }
+
+    .wf-row {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 8px;
+      align-items: center;
+    }
+
+    .wf-row .wf-box {
+      flex: 1;
+      margin-bottom: 0;
+    }
+
+    .wf-card {
+      padding: 12px;
+      margin-bottom: 12px;
+      border: 1px solid var(--line);
+      background: var(--surface);
+    }
+
+    .wf-card-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 2px;
+    }
+
+    .wf-card-sub {
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .wf-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 6px;
+      border: 1px solid #999;
+      border-radius: 2px;
+      background: #fff;
+      color: #222;
+      font-size: 10px;
+      font-weight: 700;
+    }
+
+    .wf-img {
+      border: 1px dashed #999;
+      background: #fafafa;
+      height: 70px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      color: var(--muted);
+      margin-bottom: 8px;
+      cursor: pointer;
+    }
+
+    .wf-divider {
+      height: 1px;
+      background: var(--line);
+      margin: 8px 0;
+    }
+
+    .wf-section {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--muted);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+    }
+
+    .wf-stat {
+      text-align: center;
+      flex: 1;
+      padding: 8px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+    }
+
+    .wf-stat-num {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .wf-stat-lbl {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .wf-qr {
+      border: 1px solid var(--line);
+      background: #fff;
+      width: 120px;
+      height: 120px;
+      margin: 0 auto 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .wf-qr-inner {
+      width: 80px;
+      height: 80px;
+      border: 1px dashed #999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 9px;
+      color: var(--muted);
+    }
+
+    .wf-map {
+      border: 1px dashed #999;
+      background: #fafafa;
+      height: 160px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 8px;
+    }
+
+    .wf-map-pin {
+      width: 14px;
+      height: 14px;
+      background: #111;
+      border-radius: 50% 50% 50% 0;
+      transform: rotate(-45deg);
+      margin-right: 6px;
+    }
+
+    .wf-tag {
+      font-size: 9px;
+      color: var(--muted);
+    }
+
+    .cam-box {
+      background: #fafafa;
+      height: 180px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 8px;
+      border: 1px dashed #999;
+    }
+
+    .cam-circle {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 2px solid var(--line);
+      margin-bottom: 6px;
+    }
+
+    .shutter {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 1px solid var(--line);
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .shutter-inner {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #888;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="outer">
+
+    <div class="nav-pills" id="navpills">
+      <div class="pill on" onclick="go('login')">Login</div>
+      <div class="pill" onclick="go('home')">Home</div>
+      <div class="pill" onclick="go('items')">Daftar Barang</div>
+      <div class="pill" onclick="go('detail')">Detail Barang</div>
+      <div class="pill" onclick="go('scan')">Scan QR</div>
+      <div class="pill" onclick="go('loanform')">Ajukan Pinjam</div>
+      <div class="pill" onclick="go('camera')">Kamera Foto</div>
+      <div class="pill" onclick="go('myloans')">Riwayat Pinjam</div>
+      <div class="pill" onclick="go('returnform')">Pengembalian</div>
+      <div class="pill" onclick="go('maps')">Maps Gudang</div>
+    </div>
+
+    <div class="screen-wrap">
+      <div class="screen-label" id="slabel">FR-01 · Login</div>
+      <div class="phone">
+        <div class="status-bar"><span class="sb-txt">9:41</span><span class="sb-txt">Inventory Track</span></div>
+
+        <!-- LOGIN -->
+        <div class="screen on" id="s-login">
+          <div style="padding:32px 20px 16px">
+            <div
+              style="width:48px;height:48px;border:2px solid var(--text);border-radius:10px;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:500;color:var(--text)">
+              IT</div>
+            <div style="text-align:center;font-size:14px;font-weight:500;color:var(--text);margin-bottom:4px">
+              Inventory Track</div>
+            <div style="text-align:center;font-size:11px;color:var(--muted);margin-bottom:24px">Masuk sebagai Staff
+            </div>
+            <div class="wf-label">Email</div>
+            <div class="wf-input">staff@inventorytrack.id</div>
+            <div class="wf-label">Password</div>
+            <div class="wf-input">••••••••</div>
+            <div style="margin-top:4px;width:100%" class="wf-btn primary" onclick="go('home')">Masuk</div>
+            <div style="text-align:center;font-size:10px;color:var(--muted);margin-top:12px">Akun didaftarkan oleh Admin
+            </div>
+          </div>
+        </div>
+
+        <!-- HOME -->
+        <div class="screen" id="s-home">
+          <div class="topbar">
+            <div class="topbar-title">Selamat datang, Budi</div>
+            <div style="font-size:10px;color:var(--muted)">Staff</div>
+          </div>
+          <div class="body">
+            <div class="wf-row" style="margin-bottom:10px">
+              <div class="wf-stat">
+                <div class="wf-stat-num">2</div>
+                <div class="wf-stat-lbl">Pinjaman Aktif</div>
+              </div>
+              <div class="wf-stat">
+                <div class="wf-stat-num">1</div>
+                <div class="wf-stat-lbl">Menunggu</div>
+              </div>
+              <div class="wf-stat">
+                <div class="wf-stat-num">8</div>
+                <div class="wf-stat-lbl">Riwayat</div>
+              </div>
+            </div>
+            <div class="wf-btn" style="text-align:center;font-size:12px;margin-bottom:10px;width:100%"
+              onclick="go('scan')">Scan QR Barang</div>
+            <div class="wf-section">Pinjaman Aktif Saya</div>
+            <div class="wf-card">
+              <div style="display:flex;justify-content:space-between;align-items:start">
+                <div>
+                  <div class="wf-card-title">Laptop Dell XPS 13</div>
+                  <div class="wf-card-sub">Due: 18 Apr 2026</div>
+                </div>
+                <div class="wf-badge">Active</div>
+              </div>
+            </div>
+            <div class="wf-card">
+              <div style="display:flex;justify-content:space-between;align-items:start">
+                <div>
+                  <div class="wf-card-title">Proyektor Epson</div>
+                  <div class="wf-card-sub">Due: 20 Apr 2026</div>
+                </div>
+                <div class="wf-badge">Active</div>
+              </div>
+            </div>
+            <div class="wf-section" style="margin-top:4px">Barang Tersedia</div>
+            <div class="wf-card">
+              <div class="wf-card-title">Mic Wireless Shure</div>
+              <div class="wf-card-sub">Gudang A · Available</div>
+            </div>
+          </div>
+          <div class="bottomnav">
+            <div class="bnav-item on" onclick="go('home')">
+              <div class="bnav-icon">H</div>
+              <div class="bnav-txt">Home</div>
+            </div>
+            <div class="bnav-item" onclick="go('items')">
+              <div class="bnav-icon">B</div>
+              <div class="bnav-txt">Barang</div>
+            </div>
+            <div class="bnav-item" onclick="go('scan')">
+              <div class="bnav-icon circle">S</div>
+              <div class="bnav-txt">Scan</div>
+            </div>
+            <div class="bnav-item" onclick="go('myloans')">
+              <div class="bnav-icon">R</div>
+              <div class="bnav-txt">Riwayat</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ITEMS -->
+        <div class="screen" id="s-items">
+          <div class="topbar">
+            <div class="topbar-title">Daftar Barang</div>
+          </div>
+          <div class="body">
+            <div class="wf-input" style="margin-bottom:6px">Cari nama / QR code...</div>
+            <div style="display:flex;gap:6px;margin-bottom:10px">
+              <div class="wf-badge" style="padding:4px 10px">Semua</div>
+              <div class="wf-badge" style="padding:4px 10px">Available</div>
+              <div class="wf-badge" style="padding:4px 10px">Borrowed</div>
+            </div>
+            <div class="wf-card">
+              <div style="display:flex;gap:8px;align-items:start">
+                <div style="width:40px;height:40px;border:1px dashed #999;border-radius:4px;flex-shrink:0"
+                  onclick="go('detail')"></div>
+                <div style="flex:1" onclick="go('detail')">
+                  <div class="wf-card-title">Laptop Dell XPS 13</div>
+                  <div class="wf-card-sub">Elektronik · Gudang A</div>
+                </div>
+                <div class="wf-badge">Available</div>
+              </div>
+            </div>
+            <div class="wf-card">
+              <div style="display:flex;gap:8px;align-items:start">
+                <div style="width:40px;height:40px;border:1px dashed #999;border-radius:4px;flex-shrink:0"
+                  onclick="go('detail')"></div>
+                <div style="flex:1" onclick="go('detail')">
+                  <div class="wf-card-title">Proyektor Epson EB</div>
+                  <div class="wf-card-sub">Elektronik · Gudang B</div>
+                </div>
+                <div class="wf-badge">Borrowed</div>
+              </div>
+            </div>
+            <div class="wf-card">
+              <div style="display:flex;gap:8px;align-items:start">
+                <div style="width:40px;height:40px;border:1px dashed #999;border-radius:4px;flex-shrink:0"
+                  onclick="go('detail')"></div>
+                <div style="flex:1" onclick="go('detail')">
+                  <div class="wf-card-title">Kamera Canon EOS</div>
+                  <div class="wf-card-sub">Kamera · Gudang A</div>
+                </div>
+                <div class="wf-badge">Available</div>
+              </div>
+            </div>
+            <div class="wf-card">
+              <div style="display:flex;gap:8px;align-items:start">
+                <div style="width:40px;height:40px;border:1px dashed #999;border-radius:4px;flex-shrink:0"
+                  onclick="go('detail')"></div>
+                <div style="flex:1" onclick="go('detail')">
+                  <div class="wf-card-title">Mic Wireless Shure</div>
+                  <div class="wf-card-sub">Audio · Gudang A</div>
+                </div>
+                <div class="wf-badge">Available</div>
+              </div>
+            </div>
+          </div>
+          <div class="bottomnav">
+            <div class="bnav-item" onclick="go('home')">
+              <div class="bnav-icon">H</div>
+              <div class="bnav-txt">Home</div>
+            </div>
+            <div class="bnav-item on" onclick="go('items')">
+              <div class="bnav-icon">B</div>
+              <div class="bnav-txt">Barang</div>
+            </div>
+            <div class="bnav-item" onclick="go('scan')">
+              <div class="bnav-icon circle">S</div>
+              <div class="bnav-txt">Scan</div>
+            </div>
+            <div class="bnav-item" onclick="go('myloans')">
+              <div class="bnav-icon">R</div>
+              <div class="bnav-txt">Riwayat</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- DETAIL -->
+        <div class="screen" id="s-detail">
+          <div class="topbar">
+            <div class="back-btn" onclick="go('items')">Kembali</div>
+            <div class="topbar-title">Detail Barang</div>
+          </div>
+          <div class="body">
+            <div class="wf-img">[ Foto Barang ]</div>
+            <div class="wf-card-title" style="font-size:14px;margin-bottom:2px">Laptop Dell XPS 13</div>
+            <div class="wf-card-sub" style="margin-bottom:10px">INV-2026-001</div>
+            <div class="wf-divider"></div>
+            <div class="wf-row" style="margin-bottom:8px">
+              <div style="font-size:11px;color:var(--muted);flex:1">Kategori</div>
+              <div style="font-size:11px;color:var(--text)">Elektronik</div>
+            </div>
+            <div class="wf-row" style="margin-bottom:8px">
+              <div style="font-size:11px;color:var(--muted);flex:1">Kondisi</div>
+              <div style="font-size:11px;color:var(--text)">Good</div>
+            </div>
+            <div class="wf-row" style="margin-bottom:8px">
+              <div style="font-size:11px;color:var(--muted);flex:1">Status</div>
+              <div class="wf-badge">Available</div>
+            </div>
+            <div class="wf-row" style="margin-bottom:8px">
+              <div style="font-size:11px;color:var(--muted);flex:1">Gudang</div>
+              <div style="font-size:11px;color:var(--text)">Gudang Utama A</div>
+            </div>
+            <div class="wf-divider"></div>
+            <div class="wf-btn primary" style="margin-bottom:8px;width:100%" onclick="go('loanform')">Ajukan Peminjaman
+            </div>
+            <div class="wf-btn" style="width:100%" onclick="go('maps')">Lihat Lokasi Gudang</div>
+          </div>
+        </div>
+
+        <!-- SCAN QR -->
+        <div class="screen" id="s-scan">
+          <div class="topbar">
+            <div class="back-btn" onclick="go('home')">Kembali</div>
+            <div class="topbar-title">Scan QR Barang</div>
+          </div>
+          <div class="body" style="display:flex;flex-direction:column;align-items:center;padding-top:24px">
+            <div style="font-size:11px;color:var(--muted);margin-bottom:16px;text-align:center">Arahkan kamera ke QR
+              code barang</div>
+            <div class="wf-qr">
+              <div class="wf-qr-inner">viewfinder</div>
+            </div>
+            <div style="font-size:10px;color:var(--muted);margin-bottom:20px;text-align:center">Pastikan QR code berada
+              di dalam kotak</div>
+            <div class="wf-divider" style="width:100%"></div>
+            <div style="font-size:11px;color:var(--muted);margin:12px 0 8px">Hasil Scan:</div>
+            <div class="wf-card" style="width:100%">
+              <div class="wf-card-title">Laptop Dell XPS 13</div>
+              <div class="wf-card-sub">INV-2026-001 · Available</div>
+            </div>
+            <div class="wf-btn primary" style="width:100%" onclick="go('loanform')">Ajukan Peminjaman</div>
+            <div class="wf-btn" style="width:100%;margin-top:6px" onclick="go('scan')">Scan Ulang</div>
+          </div>
+          <div class="bottomnav">
+            <div class="bnav-item" onclick="go('home')">
+              <div class="bnav-icon">H</div>
+              <div class="bnav-txt">Home</div>
+            </div>
+            <div class="bnav-item" onclick="go('items')">
+              <div class="bnav-icon">B</div>
+              <div class="bnav-txt">Barang</div>
+            </div>
+            <div class="bnav-item on" onclick="go('scan')">
+              <div class="bnav-icon circle">S</div>
+              <div class="bnav-txt">Scan</div>
+            </div>
+            <div class="bnav-item" onclick="go('myloans')">
+              <div class="bnav-icon">R</div>
+              <div class="bnav-txt">Riwayat</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- LOAN FORM -->
+        <div class="screen" id="s-loanform">
+          <div class="topbar">
+            <div class="back-btn" onclick="go('detail')">Kembali</div>
+            <div class="topbar-title">Ajukan Peminjaman</div>
+          </div>
+          <div class="body">
+            <div class="wf-card" style="margin-bottom:10px">
+              <div class="wf-card-title">Laptop Dell XPS 13</div>
+              <div class="wf-card-sub">INV-2026-001 · Available · Good</div>
+            </div>
+            <div class="wf-label">Tanggal Pinjam</div>
+            <div class="wf-input">09 April 2026</div>
+            <div class="wf-label">Tanggal Kembali</div>
+            <div class="wf-input">16 April 2026</div>
+            <div class="wf-label">Catatan</div>
+            <div class="wf-input" style="height:50px;padding-top:8px">Untuk keperluan rapat...</div>
+            <div class="wf-label">Foto Kondisi Barang</div>
+            <div class="wf-img" style="height:80px" onclick="go('camera')">[ Foto belum diambil ] Tap untuk kamera</div>
+            <div class="wf-btn primary" style="margin-top:4px;width:100%" onclick="go('myloans')">Kirim Pengajuan</div>
+          </div>
+        </div>
+
+        <!-- CAMERA -->
+        <div class="screen" id="s-camera">
+          <div class="topbar">
+            <div class="back-btn" onclick="go('loanform')">Kembali</div>
+            <div class="topbar-title">Foto Kondisi Barang</div>
+          </div>
+          <div class="body" style="display:flex;flex-direction:column;align-items:center">
+            <div class="cam-box" style="width:100%">
+              <div class="cam-circle"></div>
+              <div style="font-size:10px;color:var(--muted)">Preview kamera</div>
+            </div>
+            <div style="font-size:10px;color:var(--muted);margin-bottom:16px;text-align:center">Mode resolusi rendah
+              aktif</div>
+            <div class="shutter"></div>
+            <div style="font-size:10px;color:var(--muted);margin-top:8px">Tap untuk mengambil foto</div>
+            <div class="wf-divider" style="width:100%;margin-top:16px"></div>
+            <div style="font-size:11px;color:var(--muted);margin:10px 0 6px">Preview:</div>
+            <div class="wf-img" style="width:100%;height:80px">[ Preview foto ]</div>
+            <div style="display:flex;gap:8px;width:100%;margin-top:4px">
+              <div class="wf-btn" style="flex:1" onclick="go('camera')">Ulangi</div>
+              <div class="wf-btn primary" style="flex:1" onclick="go('loanform')">Gunakan Foto</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- MY LOANS -->
+        <div class="screen" id="s-myloans">
+          <div class="topbar">
+            <div class="topbar-title">Riwayat Pinjam Saya</div>
+          </div>
+          <div class="body">
+            <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">
+              <div class="wf-badge" style="padding:4px 10px">Semua</div>
+              <div class="wf-badge" style="padding:4px 10px">Active</div>
+              <div class="wf-badge" style="padding:4px 10px">Pending</div>
+              <div class="wf-badge" style="padding:4px 10px">Returned</div>
+            </div>
+            <div class="wf-card">
+              <div style="display:flex;justify-content:space-between;align-items:start">
+                <div>
+                  <div class="wf-card-title">Laptop Dell XPS 13</div>
+                  <div class="wf-card-sub">01 Apr – 08 Apr</div>
+                </div>
+                <div class="wf-badge">Overdue</div>
+              </div>
+              <div class="wf-btn" style="margin-top:8px;font-size:11px;padding:5px" onclick="go('returnform')">
+                Kembalikan</div>
+            </div>
+            <div class="wf-card">
+              <div style="display:flex;justify-content:space-between;align-items:start">
+                <div>
+                  <div class="wf-card-title">Proyektor Epson</div>
+                  <div class="wf-card-sub">05 Apr – 12 Apr</div>
+                </div>
+                <div class="wf-badge">Active</div>
+              </div>
+              <div class="wf-btn" style="margin-top:8px;font-size:11px;padding:5px" onclick="go('returnform')">
+                Kembalikan</div>
+            </div>
+            <div class="wf-card">
+              <div style="display:flex;justify-content:space-between;align-items:start">
+                <div>
+                  <div class="wf-card-title">Mic Wireless</div>
+                  <div class="wf-card-sub">01 Mar – 07 Mar</div>
+                </div>
+                <div class="wf-badge">Returned</div>
+              </div>
+            </div>
+            <div class="wf-card">
+              <div style="display:flex;justify-content:space-between;align-items:start">
+                <div>
+                  <div class="wf-card-title">Kamera Canon</div>
+                  <div class="wf-card-sub">07 Apr – 14 Apr</div>
+                </div>
+                <div class="wf-badge">Pending</div>
+              </div>
+            </div>
+          </div>
+          <div class="bottomnav">
+            <div class="bnav-item" onclick="go('home')">
+              <div class="bnav-icon">H</div>
+              <div class="bnav-txt">Home</div>
+            </div>
+            <div class="bnav-item" onclick="go('items')">
+              <div class="bnav-icon">B</div>
+              <div class="bnav-txt">Barang</div>
+            </div>
+            <div class="bnav-item" onclick="go('scan')">
+              <div class="bnav-icon circle">S</div>
+              <div class="bnav-txt">Scan</div>
+            </div>
+            <div class="bnav-item on" onclick="go('myloans')">
+              <div class="bnav-icon">R</div>
+              <div class="bnav-txt">Riwayat</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RETURN FORM -->
+        <div class="screen" id="s-returnform">
+          <div class="topbar">
+            <div class="back-btn" onclick="go('myloans')">Kembali</div>
+            <div class="topbar-title">Kembalikan Barang</div>
+          </div>
+          <div class="body">
+            <div class="wf-card" style="margin-bottom:10px">
+              <div class="wf-card-title">Laptop Dell XPS 13</div>
+              <div class="wf-card-sub">Dipinjam: 01 Apr · Due: 08 Apr</div>
+            </div>
+            <div class="wf-label">Kondisi Barang Saat Kembali</div>
+            <div style="display:flex;gap:8px;margin-bottom:10px">
+              <div class="wf-btn" style="flex:1;padding:8px">Good</div>
+              <div class="wf-btn primary" style="flex:1;padding:8px">Damaged</div>
+            </div>
+            <div class="wf-label">Foto Kondisi Saat Kembali</div>
+            <div class="wf-img" style="height:80px;margin-bottom:8px" onclick="go('camera')">[ Tap untuk buka kamera ]
+            </div>
+            <div class="wf-label">Catatan (opsional)</div>
+            <div class="wf-input" style="height:50px;padding-top:8px;margin-bottom:10px">Terdapat lecetan kecil di
+              sudut...</div>
+            <div class="wf-btn primary" style="width:100%" onclick="go('myloans')">Konfirmasi Pengembalian</div>
+          </div>
+        </div>
+
+        <!-- MAPS -->
+        <div class="screen" id="s-maps">
+          <div class="topbar">
+            <div class="back-btn" onclick="go('detail')">Kembali</div>
+            <div class="topbar-title">Lokasi Gudang</div>
+          </div>
+          <div class="body">
+            <div class="wf-map">
+              <div class="wf-map-pin"></div>
+              <div style="font-size:10px;color:var(--muted)">Peta interaktif (Google Maps)</div>
+            </div>
+            <div class="wf-card">
+              <div style="display:flex;justify-content:space-between;align-items:start">
+                <div>
+                  <div class="wf-card-title">Gudang Utama A</div>
+                  <div class="wf-card-sub">Jl. Industri No. 10, Jakarta</div>
+                  <div class="wf-card-sub" style="margin-top:2px">-6.2088, 106.8456</div>
+                </div>
+                <div class="wf-badge">1.2 km</div>
+              </div>
+              <div class="wf-btn" style="margin-top:8px;font-size:11px;padding:5px;width:100%">Buka di Google Maps</div>
+            </div>
+            <div class="wf-card">
+              <div style="display:flex;justify-content:space-between;align-items:start">
+                <div>
+                  <div class="wf-card-title">Gudang B – Selatan</div>
+                  <div class="wf-card-sub">Jl. Raya Bogor KM 20</div>
+                </div>
+                <div class="wf-badge">8.4 km</div>
+              </div>
+              <div class="wf-btn" style="margin-top:8px;font-size:11px;padding:5px;width:100%">Buka di Google Maps</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const labels = { login: 'FR-01 · Login', home: 'FR-10, FR-15 · Home', items: 'FR-10 · Daftar Barang', detail: 'FR-10, FR-12, FR-16 · Detail Barang', scan: 'FR-11 · Scan QR', loanform: 'FR-12, FR-13 · Ajukan Peminjaman', camera: 'FR-13 · Kamera Foto Kondisi', myloans: 'FR-15 · Riwayat Pinjam', returnform: 'FR-14, FR-13 · Pengembalian', maps: 'FR-16 · Maps Gudang' };
+
+    function go(id) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('on'));
+      document.querySelectorAll('.pill').forEach(p => p.classList.remove('on'));
+
+      const screen = document.getElementById('s-' + id);
+      if (screen) screen.classList.add('on');
+
+      document.querySelectorAll('.pill').forEach(p => {
+        if (p.getAttribute('onclick') && p.getAttribute('onclick').includes("'" + id + "'")) {
+          p.classList.add('on');
+        }
+      });
+
+      document.querySelectorAll('.bnav-item').forEach(b => {
+        b.classList.remove('on');
+        if (b.getAttribute('onclick') && b.getAttribute('onclick').includes("'" + id + "'")) {
+          b.classList.add('on');
+        }
+      });
+
+      document.getElementById('slabel').textContent = labels[id] || id;
+    }
+  </script>
+</body>
+
+</html>
