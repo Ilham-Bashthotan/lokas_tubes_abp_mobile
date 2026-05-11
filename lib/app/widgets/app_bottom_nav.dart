@@ -5,7 +5,7 @@ import '../theme/app_theme.dart';
 
 class AppBottomNav extends StatelessWidget {
   /// Current active index:
-  /// 0 = Home, 1 = Barang, 2 = Scan, 3 = Riwayat
+  /// 0 = Home, 1 = Barang, 2 = Scan, 3 = Riwayat, 4 = Profil
   final int currentIndex;
 
   const AppBottomNav({super.key, required this.currentIndex});
@@ -23,6 +23,9 @@ class AppBottomNav extends StatelessWidget {
         break;
       case 3:
         Get.offAllNamed(Routes.MY_LOANS);
+        break;
+      case 4:
+        Get.offAllNamed(Routes.PROFILE);
         break;
     }
   }
@@ -114,6 +117,12 @@ class AppBottomNav extends StatelessWidget {
                 label: 'Riwayat',
                 active: currentIndex == 3,
                 onTap: () => _onTap(3),
+              ),
+              _NavItem(
+                icon: Icons.person_rounded,
+                label: 'Profil',
+                active: currentIndex == 4,
+                onTap: () => _onTap(4),
               ),
             ],
           ),
