@@ -130,7 +130,7 @@ class MyLoansView extends GetView<MyLoansController> {
           ),
         ],
       ),
-      bottomNavigationBar: const AppBottomNav(currentIndex: 3),
+      bottomNavigationBar: const AppBottomNav(currentIndex: 4),
     );
   }
 }
