@@ -79,13 +79,6 @@ class ProfileView extends GetView<ProfileController> {
                                   ? _RoleBadge(role: controller.userRole.value)
                                   : null,
                             ),
-                            _InfoItem(
-                              icon: Icons.tag_rounded,
-                              label: 'ID Pengguna',
-                              value: controller.userId.value == 0
-                                  ? '—'
-                                  : '#${controller.userId.value}',
-                            ),
                           ],
                         ),
 

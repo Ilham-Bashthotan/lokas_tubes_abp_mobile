@@ -52,11 +52,25 @@ class ProfileController extends GetxController {
       );
 
       if (resp.statusCode == 200) {
-        final data = resp.data is Map ? resp.data : resp.data['user'] ?? resp.data['data'] ?? {};
-        userId.value = data['id'] ?? 0;
-        userName.value = data['name'] ?? '';
-        userEmail.value = data['email'] ?? '';
-        userRole.value = data['role'] ?? '';
+        final body = resp.data as Map<String, dynamic>;
+        debugPrint('[PROFILE] Response: $body');
+
+        // Cek nested 'data' dulu
+        final data = (body['data'] is Map)
+            ? body['data'] as Map<String, dynamic>
+            : body;
+
+        // Response auth/me mungkin punya 'user' di dalam 'data'
+        final user = (data['user'] is Map)
+            ? data['user'] as Map<String, dynamic>
+            : data;
+
+        userId.value = user['id'] ?? 0;
+        userName.value = user['name'] ?? '';
+        userEmail.value = user['email'] ?? '';
+        userRole.value = user['role'] ?? '';
+
+        debugPrint('[PROFILE] User: ${userName.value}');
       }
     } on DioException catch (e) {
       final status = e.response?.statusCode;
@@ -71,11 +85,7 @@ class ProfileController extends GetxController {
         );
       }
     } catch (e) {
-      Get.snackbar(
-        'Error',
-        e.toString(),
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      Get.snackbar('Error', e.toString(), snackPosition: SnackPosition.BOTTOM);
     } finally {
       isLoading.value = false;
     }
