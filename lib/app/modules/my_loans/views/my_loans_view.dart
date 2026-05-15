@@ -270,7 +270,9 @@ class _LoanCard extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: loan.statusColor.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: loan.statusColor.withValues(alpha: 0.3)),
+                  border: Border.all(
+                    color: loan.statusColor.withValues(alpha: 0.3),
+                  ),
                 ),
                 child: Text(
                   loan.status,
