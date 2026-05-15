@@ -5,7 +5,7 @@ import '../theme/app_theme.dart';
 
 class AppBottomNav extends StatelessWidget {
   /// Current active index:
-  /// 0 = Home, 1 = Barang, 2 = Scan, 3 = Maps, 4 = Riwayat
+  /// 0 = Home, 1 = Barang, 2 = Scan, 3 = Riwayat
   final int currentIndex;
 
   const AppBottomNav({super.key, required this.currentIndex});
@@ -22,9 +22,6 @@ class AppBottomNav extends StatelessWidget {
         Get.offAllNamed(Routes.SCAN_QR);
         break;
       case 3:
-        Get.offAllNamed(Routes.WAREHOUSE_MAP);
-        break;
-      case 4:
         Get.offAllNamed(Routes.MY_LOANS);
         break;
     }
@@ -66,19 +63,22 @@ class AppBottomNav extends StatelessWidget {
                 onTap: () => _onTap(1),
               ),
 
-              // Tombol Scan QR (tengah, prominent)
+              // PERUBAHAN: Tombol Scan QR menjadi Persegi Panjang
               GestureDetector(
                 onTap: () => _onTap(2),
                 child: Container(
-                  height: 48,
-                  padding: const EdgeInsets.symmetric(horizontal: 18),
+                  height: 52, // Tinggi dipertahankan
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                  ), // Memberikan lebar (persegi panjang)
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
                       colors: [AppColors.primaryLight, AppColors.primaryDark],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
-                    borderRadius: BorderRadius.circular(14),
+                    // Anda bisa mengubah 16 menjadi 26 jika ingin bentuknya oval/pill-shape
+                    borderRadius: BorderRadius.circular(16),
                     boxShadow: [
                       BoxShadow(
                         color: AppColors.primaryDark.withValues(alpha: 0.4),
@@ -93,15 +93,15 @@ class AppBottomNav extends StatelessWidget {
                       Icon(
                         Icons.qr_code_scanner_rounded,
                         color: Colors.white,
-                        size: 20,
+                        size: 24,
                       ),
-                      SizedBox(width: 6),
+                      SizedBox(width: 8), // Jarak antara ikon dan teks
                       Text(
-                        'Scan',
+                        'Scan QR',
                         style: TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
-                          fontSize: 13,
+                          fontSize: 14,
                         ),
                       ),
                     ],
@@ -110,16 +110,10 @@ class AppBottomNav extends StatelessWidget {
               ),
 
               _NavItem(
-                icon: Icons.map_rounded,
-                label: 'Maps',
-                active: currentIndex == 3,
-                onTap: () => _onTap(3),
-              ),
-              _NavItem(
                 icon: Icons.history_rounded,
                 label: 'Riwayat',
-                active: currentIndex == 4,
-                onTap: () => _onTap(4),
+                active: currentIndex == 3,
+                onTap: () => _onTap(3),
               ),
             ],
           ),

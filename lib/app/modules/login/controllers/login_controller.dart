@@ -26,13 +26,6 @@ class LoginController extends GetxController {
       return;
     }
 
-    // Mock login untuk testing tanpa backend
-    if ((email == 'staff@lokas.test' || email == 'admin@lokas.test') &&
-        password == 'password') {
-      Get.offAllNamed('/home');
-      return;
-    }
-
     try {
       isLoading.value = true;
       final ok = await AuthService.login(email: email, password: password);
