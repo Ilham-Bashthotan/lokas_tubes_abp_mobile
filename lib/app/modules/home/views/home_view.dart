@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../../data/item_model.dart';
 import '../../../theme/app_theme.dart';
 import '../../../routes/app_pages.dart';
 import '../../../widgets/app_bottom_nav.dart';
@@ -49,29 +50,31 @@ class HomeView extends GetView<HomeController> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // ── Stats Row ────────────────────────────────
-                  Row(
-                    children: [
-                      _StatCard(
-                        label: 'Pinjaman Aktif',
-                        value: '2',
-                        icon: Icons.inventory_2_rounded,
-                        color: AppColors.primary,
-                      ),
-                      const SizedBox(width: 10),
-                      _StatCard(
-                        label: 'Menunggu',
-                        value: '1',
-                        icon: Icons.hourglass_top_rounded,
-                        color: AppColors.statusPending,
-                      ),
-                      const SizedBox(width: 10),
-                      _StatCard(
-                        label: 'Riwayat',
-                        value: '8',
-                        icon: Icons.history_rounded,
-                        color: AppColors.statusReturned,
-                      ),
-                    ],
+                  Obx(
+                    () => Row(
+                      children: [
+                        _StatCard(
+                          label: 'Pinjaman Aktif',
+                          value: controller.borrowedCount.value.toString(),
+                          icon: Icons.inventory_2_rounded,
+                          color: AppColors.primary,
+                        ),
+                        const SizedBox(width: 10),
+                        _StatCard(
+                          label: 'Menunggu',
+                          value: controller.maintenanceCount.value.toString(),
+                          icon: Icons.hourglass_top_rounded,
+                          color: AppColors.statusPending,
+                        ),
+                        const SizedBox(width: 10),
+                        _StatCard(
+                          label: 'Riwayat',
+                          value: controller.totalCount.value.toString(),
+                          icon: Icons.history_rounded,
+                          color: AppColors.statusReturned,
+                        ),
+                      ],
+                    ),
                   ),
                   const SizedBox(height: 16),
 
@@ -192,16 +195,40 @@ class HomeView extends GetView<HomeController> {
                     onMore: () => Get.toNamed(Routes.ITEMS),
                   ),
                   const SizedBox(height: 10),
-                  _AvailableItemCard(
-                    name: 'Mic Wireless Shure',
-                    location: 'Gudang A',
-                    icon: Icons.mic_rounded,
-                  ),
-                  const SizedBox(height: 8),
-                  _AvailableItemCard(
-                    name: 'Kamera Canon EOS',
-                    location: 'Gudang A',
-                    icon: Icons.camera_alt_rounded,
+                  Obx(
+                    () {
+                      if (controller.isLoading.value) {
+                        return const Center(
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(vertical: 20),
+                            child: CircularProgressIndicator(),
+                          ),
+                        );
+                      }
+
+                      if (controller.availableItems.isEmpty) {
+                        return Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(vertical: 20),
+                          child: const Text(
+                            'Tidak ada barang tersedia saat ini.',
+                            style: TextStyle(color: AppColors.textSecondary),
+                            textAlign: TextAlign.center,
+                          ),
+                        );
+                      }
+
+                      return Column(
+                        children: controller.availableItems
+                            .map(
+                              (item) => Padding(
+                                padding: const EdgeInsets.only(bottom: 8),
+                                child: _AvailableItemCard(item: item),
+                              ),
+                            )
+                            .toList(),
+                      );
+                    },
                   ),
                   const SizedBox(height: 16),
                 ],
@@ -359,18 +386,13 @@ class _ActiveLoanCard extends StatelessWidget {
 }
 
 class _AvailableItemCard extends StatelessWidget {
-  final String name, location;
-  final IconData icon;
-  const _AvailableItemCard({
-    required this.name,
-    required this.location,
-    required this.icon,
-  });
+  final Item item;
+  const _AvailableItemCard({required this.item});
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => Get.toNamed(Routes.ITEM_DETAIL),
+      onTap: () => Get.toNamed(Routes.ITEM_DETAIL, arguments: item.id),
       child: Container(
         decoration: AppDecoration.card,
         padding: const EdgeInsets.all(14),
@@ -383,16 +405,23 @@ class _AvailableItemCard extends StatelessWidget {
                 color: AppColors.statusAvailable.withValues(alpha: 0.10),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Icon(icon, color: AppColors.statusAvailable, size: 22),
+              child: Icon(
+                item.status == 'available' ? Icons.inventory_2_rounded : Icons.device_unknown_rounded,
+                color: AppColors.statusAvailable,
+                size: 22,
+              ),
             ),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(name, style: AppTextStyles.subtitle),
+                  Text(item.name, style: AppTextStyles.subtitle),
                   const SizedBox(height: 2),
-                  Text('Gudang A · $location', style: AppTextStyles.caption),
+                  Text(
+                    '${item.warehouse?.name ?? 'Gudang'} · ${item.status.capitalizeFirst}',
+                    style: AppTextStyles.caption,
+                  ),
                 ],
               ),
             ),
@@ -405,9 +434,9 @@ class _AvailableItemCard extends StatelessWidget {
                   color: AppColors.statusAvailable.withValues(alpha: 0.3),
                 ),
               ),
-              child: const Text(
-                'Available',
-                style: TextStyle(
+              child: Text(
+                item.status.capitalizeFirst ?? item.status,
+                style: const TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w700,
                   color: AppColors.statusAvailable,

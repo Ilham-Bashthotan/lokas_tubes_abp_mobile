@@ -1,23 +1,38 @@
 import 'package:get/get.dart';
 
-class HomeController extends GetxController {
-  //TODO: Implement HomeController
+import '../../../data/items_service.dart';
+import '../../../data/item_model.dart';
 
-  final count = 0.obs;
+class HomeController extends GetxController {
+  final isLoading = false.obs;
+  final availableItems = <Item>[].obs;
+  final borrowedCount = 0.obs;
+  final maintenanceCount = 0.obs;
+  final totalCount = 0.obs;
+
   @override
   void onInit() {
     super.onInit();
+    loadHomeData();
   }
 
-  @override
-  void onReady() {
-    super.onReady();
-  }
+  Future<void> loadHomeData() async {
+    try {
+      isLoading.value = true;
+      final availablePage = await ItemsService.fetchItems(status: 'available', perPage: 4);
 
-  @override
-  void onClose() {
-    super.onClose();
-  }
+      final borrowedTotal = await ItemsService.fetchItemsTotal(status: 'borrowed');
+      final maintenanceTotal = await ItemsService.fetchItemsTotal(status: 'maintenance');
+      final totalItems = await ItemsService.fetchItemsTotal();
 
-  void increment() => count.value++;
+      availableItems.value = availablePage.items;
+      borrowedCount.value = borrowedTotal;
+      maintenanceCount.value = maintenanceTotal;
+      totalCount.value = totalItems;
+    } catch (error) {
+      Get.snackbar('Terjadi kesalahan', 'Gagal mengambil data dari server');
+    } finally {
+      isLoading.value = false;
+    }
+  }
 }

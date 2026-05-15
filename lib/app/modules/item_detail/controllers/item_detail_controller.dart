@@ -1,23 +1,47 @@
 import 'package:get/get.dart';
 
-class ItemDetailController extends GetxController {
-  //TODO: Implement ItemDetailController
+import '../../../data/dummy_items.dart';
+import '../../../data/item_model.dart';
 
-  final count = 0.obs;
+class ItemDetailController extends GetxController {
+  final item = Rxn<Item>();
+  final isLoading = false.obs;
+  final errorMessage = RxnString();
+
+  int? get itemId {
+    final args = Get.arguments;
+    if (args == null) return null;
+    if (args is int) return args;
+    if (args is String) return int.tryParse(args);
+    if (args is Map && args['id'] != null) {
+      return int.tryParse('${args['id']}');
+    }
+    return null;
+  }
+
   @override
   void onInit() {
     super.onInit();
+    loadItem();
   }
 
-  @override
-  void onReady() {
-    super.onReady();
-  }
+  Future<void> loadItem() async {
+    final id = itemId;
+    if (id == null) {
+      errorMessage.value = 'ID barang tidak ditemukan.';
+      return;
+    }
 
-  @override
-  void onClose() {
-    super.onClose();
-  }
+    isLoading.value = true;
+    errorMessage.value = null;
 
-  void increment() => count.value++;
+    await Future.delayed(const Duration(milliseconds: 250));
+    final foundItem = DummyItems.findById(id);
+    if (foundItem == null) {
+      errorMessage.value = 'Barang tidak ditemukan.';
+    } else {
+      item.value = foundItem;
+    }
+    isLoading.value = false;
+  }
 }
