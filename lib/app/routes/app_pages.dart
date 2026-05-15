@@ -12,11 +12,13 @@ import '../modules/login/bindings/login_binding.dart';
 import '../modules/login/views/login_view.dart';
 import '../modules/my_loans/bindings/my_loans_binding.dart';
 import '../modules/my_loans/views/my_loans_view.dart';
+import '../modules/profile/bindings/profile_binding.dart';
+import '../modules/profile/views/profile_view.dart';
 import '../modules/return_form/bindings/return_form_binding.dart';
 import '../modules/return_form/views/return_form_view.dart';
 import '../modules/scan_qr/bindings/scan_qr_binding.dart';
-import '../modules/scan_qr/views/scan_qr_view.dart';
 import '../modules/scan_qr/views/camera_photo_view.dart';
+import '../modules/scan_qr/views/scan_qr_view.dart';
 import '../modules/warehouse_map/bindings/warehouse_map_binding.dart';
 import '../modules/warehouse_map/views/warehouse_map_view.dart';
 
@@ -84,6 +86,11 @@ class AppPages {
       name: _Paths.CAMERA,
       page: () => const CameraPhotoView(),
       binding: ScanQrBinding(),
+    ),
+    GetPage(
+      name: _Paths.PROFILE,
+      page: () => const ProfileView(),
+      binding: ProfileBinding(),
     ),
   ];
 }
