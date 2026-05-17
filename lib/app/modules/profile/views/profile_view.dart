@@ -13,7 +13,7 @@ class ProfileView extends GetView<ProfileController> {
       backgroundColor: AppColors.background,
       body: CustomScrollView(
         slivers: [
-          // ── App Bar ──────────────────────────────────────
+          // App Bar
           SliverAppBar(
             pinned: true,
             backgroundColor: AppColors.surface,
@@ -29,8 +29,7 @@ class ProfileView extends GetView<ProfileController> {
               child: Container(height: 1, color: AppColors.divider),
             ),
           ),
-
-          // ── Body ─────────────────────────────────────────
+          // Body
           SliverToBoxAdapter(
             child: Obx(() {
               if (controller.isLoading.value) {
@@ -42,12 +41,12 @@ class ProfileView extends GetView<ProfileController> {
 
               return Column(
                 children: [
-                  // ── Hero Header ──────────────────────────
+                  // Hero Header
                   _ProfileHeroHeader(controller: controller),
 
                   const SizedBox(height: 16),
 
-                  // ── Info Cards ───────────────────────────
+                  // Info Cards
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Column(
@@ -81,20 +80,17 @@ class ProfileView extends GetView<ProfileController> {
                             ),
                           ],
                         ),
-
                         const SizedBox(height: 16),
-
-                        // ── Refresh button ────────────────
+                        // Refresh button
                         _ActionTile(
                           icon: Icons.refresh_rounded,
                           label: 'Muat Ulang Profil',
                           color: AppColors.primary,
-                          onTap: controller.fetchProfile,
+                          onTap: () =>
+                              controller.fetchProfile(forceRefresh: true),
                         ),
-
                         const SizedBox(height: 8),
-
-                        // ── Logout Button ─────────────────
+                        // Logout Button
                         Obx(
                           () => _ActionTile(
                             icon: Icons.logout_rounded,
@@ -107,7 +103,6 @@ class ProfileView extends GetView<ProfileController> {
                                 : controller.logout,
                           ),
                         ),
-
                         const SizedBox(height: 24),
                       ],
                     ),
@@ -123,12 +118,10 @@ class ProfileView extends GetView<ProfileController> {
   }
 }
 
-// ── Hero Header ────────────────────────────────────────────────────────────────
-
+// Hero Header
 class _ProfileHeroHeader extends StatelessWidget {
   final ProfileController controller;
   const _ProfileHeroHeader({required this.controller});
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -168,7 +161,6 @@ class _ProfileHeroHeader extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 14),
-
           // Name
           Text(
             controller.userName.value.isEmpty
@@ -182,7 +174,6 @@ class _ProfileHeroHeader extends StatelessWidget {
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 4),
-
           // Email
           Text(
             controller.userEmail.value,
@@ -193,7 +184,6 @@ class _ProfileHeroHeader extends StatelessWidget {
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 12),
-
           // Role badge
           if (controller.userRole.value.isNotEmpty)
             _RoleBadge(role: controller.userRole.value, onGradient: true),
@@ -203,8 +193,7 @@ class _ProfileHeroHeader extends StatelessWidget {
   }
 }
 
-// ── Role Badge ─────────────────────────────────────────────────────────────────
-
+// Role Badge
 class _RoleBadge extends StatelessWidget {
   final String role;
   final bool onGradient;
@@ -272,7 +261,7 @@ class _RoleBadge extends StatelessWidget {
   }
 }
 
-// ── Info Section ───────────────────────────────────────────────────────────────
+// Info Section
 
 class _InfoSection extends StatelessWidget {
   final String title;
@@ -378,7 +367,7 @@ class _InfoItem extends StatelessWidget {
   }
 }
 
-// ── Action Tile ────────────────────────────────────────────────────────────────
+// Action Tile
 
 class _ActionTile extends StatelessWidget {
   final IconData icon;

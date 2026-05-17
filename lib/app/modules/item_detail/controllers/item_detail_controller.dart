@@ -1,6 +1,6 @@
 import 'package:get/get.dart';
 
-import '../../../data/dummy_items.dart';
+import '../../../data/items_service.dart';
 import '../../../data/item_model.dart';
 
 class ItemDetailController extends GetxController {
@@ -35,12 +35,11 @@ class ItemDetailController extends GetxController {
     isLoading.value = true;
     errorMessage.value = null;
 
-    await Future.delayed(const Duration(milliseconds: 250));
-    final foundItem = DummyItems.findById(id);
-    if (foundItem == null) {
-      errorMessage.value = 'Barang tidak ditemukan.';
-    } else {
+    try {
+      final foundItem = await ItemsService.fetchItem(id);
       item.value = foundItem;
+    } catch (_) {
+      errorMessage.value = 'Barang tidak ditemukan atau gagal memuat data.';
     }
     isLoading.value = false;
   }

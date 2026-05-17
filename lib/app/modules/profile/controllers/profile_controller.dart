@@ -1,13 +1,11 @@
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../../data/api_client.dart';
 import '../../../data/auth_service.dart';
 import '../../../routes/app_pages.dart';
 
 class ProfileController extends GetxController {
   final count = 0.obs;
-  // ── State ──────────────────────────────────────────────
+  // State
   final isLoading = false.obs;
   final isLoggingOut = false.obs;
 
@@ -16,7 +14,7 @@ class ProfileController extends GetxController {
   final userRole = ''.obs;
   final userId = 0.obs;
 
-  // ── Lifecycle ──────────────────────────────────────────
+  // Lifecycle
   @override
   void onInit() {
     super.onInit();
@@ -35,55 +33,23 @@ class ProfileController extends GetxController {
 
   void increment() => count.value++;
 
-  // ── API Call ───────────────────────────────────────────
-  Future<void> fetchProfile() async {
+  Future<void> fetchProfile({bool forceRefresh = false}) async {
     try {
       isLoading.value = true;
 
-      final token = await AuthService.getToken();
-      if (token == null) {
+      final user = await AuthService.getProfile(forceRefresh: forceRefresh);
+      if (user == null) {
+        await AuthService.logout();
         Get.offAllNamed(Routes.LOGIN);
         return;
       }
 
-      final resp = await ApiClient.dio.get(
-        'auth/me',
-        options: Options(headers: {'Authorization': 'Bearer $token'}),
-      );
+      userId.value = user['id'] ?? 0;
+      userName.value = user['name'] ?? '';
+      userEmail.value = user['email'] ?? '';
+      userRole.value = user['role'] ?? '';
 
-      if (resp.statusCode == 200) {
-        final body = resp.data as Map<String, dynamic>;
-        debugPrint('[PROFILE] Response: $body');
-
-        // Cek nested 'data' dulu
-        final data = (body['data'] is Map)
-            ? body['data'] as Map<String, dynamic>
-            : body;
-
-        // Response auth/me mungkin punya 'user' di dalam 'data'
-        final user = (data['user'] is Map)
-            ? data['user'] as Map<String, dynamic>
-            : data;
-
-        userId.value = user['id'] ?? 0;
-        userName.value = user['name'] ?? '';
-        userEmail.value = user['email'] ?? '';
-        userRole.value = user['role'] ?? '';
-
-        debugPrint('[PROFILE] User: ${userName.value}');
-      }
-    } on DioException catch (e) {
-      final status = e.response?.statusCode;
-      if (status == 401) {
-        await AuthService.logout();
-        Get.offAllNamed(Routes.LOGIN);
-      } else {
-        Get.snackbar(
-          'Gagal memuat profil',
-          e.message ?? 'Terjadi kesalahan',
-          snackPosition: SnackPosition.BOTTOM,
-        );
-      }
+      debugPrint('[PROFILE] User: ${userName.value}');
     } catch (e) {
       Get.snackbar('Error', e.toString(), snackPosition: SnackPosition.BOTTOM);
     } finally {
@@ -91,7 +57,7 @@ class ProfileController extends GetxController {
     }
   }
 
-  // ── Logout ─────────────────────────────────────────────
+  // Logout
   Future<void> logout() async {
     final confirmed = await Get.dialog<bool>(
       AlertDialog(
@@ -119,7 +85,7 @@ class ProfileController extends GetxController {
     }
   }
 
-  // ── Helpers ────────────────────────────────────────────
+  // Helpers
   String get roleLabel {
     switch (userRole.value.toLowerCase()) {
       case 'admin':

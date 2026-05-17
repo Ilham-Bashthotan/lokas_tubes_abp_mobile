@@ -3,7 +3,6 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:get/get.dart';
 
 import '../../../theme/app_theme.dart';
-import '../../../widgets/app_bottom_nav.dart';
 import '../controllers/warehouse_map_controller.dart';
 
 class WarehouseMapView extends GetView<WarehouseMapController> {
@@ -15,35 +14,28 @@ class WarehouseMapView extends GetView<WarehouseMapController> {
       backgroundColor: AppColors.background,
       body: CustomScrollView(
         slivers: [
-          // ── App Bar ─────────────────────────────────────────
+          // App Bar
           SliverAppBar(
             pinned: true,
             backgroundColor: AppColors.surface,
             expandedHeight: 60,
             elevation: 0,
-            automaticallyImplyLeading: false,
-            title: const Text(
-              'LOKAS',
-              style: TextStyle(
-                fontWeight: FontWeight.w800,
-                fontSize: 22,
-                letterSpacing: -1,
+            leading: IconButton(
+              icon: const Icon(
+                Icons.arrow_back_ios_new_rounded,
+                size: 20,
+                color: AppColors.primary,
               ),
+              onPressed: () => Get.back(),
             ),
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.notifications_none_rounded),
-                onPressed: () {},
-              ),
-              const SizedBox(width: 8),
-            ],
+            title: const Text('Lokasi Gudang'),
             bottom: PreferredSize(
               preferredSize: const Size.fromHeight(1),
               child: Container(height: 1, color: AppColors.divider),
             ),
           ),
 
-          // ── Content ─────────────────────────────────────────
+          // Content
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.all(16),
@@ -83,7 +75,7 @@ class WarehouseMapView extends GetView<WarehouseMapController> {
                   ),
                   const SizedBox(height: 16),
 
-                  // ── Map Container ───────────────────────────
+                  // Map Container
                   Container(
                     height: 300,
                     decoration: BoxDecoration(
@@ -175,7 +167,7 @@ class WarehouseMapView extends GetView<WarehouseMapController> {
                   ),
                   const SizedBox(height: 16),
 
-                  // ── Stats Row ───────────────────────────────
+                  // Stats Row
                   Obx(() {
                     final user = controller.userPosition.value;
                     return Row(
@@ -209,21 +201,22 @@ class WarehouseMapView extends GetView<WarehouseMapController> {
                   }),
                   const SizedBox(height: 20),
 
-                  // ── Warehouse List Section ──────────────────
+                  // Warehouse List Section
                   const Text('Daftar Gudang', style: AppTextStyles.subtitle),
                   const SizedBox(height: 10),
 
                   // Warehouse cards
                   ...controller.warehouses.map(
-                    (wh) => Obx(() => _WarehouseCard(
-                          warehouse: wh,
-                          isSelected:
-                              controller.selectedWarehouse.value?.id == wh.id,
-                          distance: controller.getDistanceString(wh),
-                          onTap: () => controller.selectWarehouse(wh),
-                          onNavigate: () =>
-                              controller.navigateToGoogleMaps(wh),
-                        )),
+                    (wh) => Obx(
+                      () => _WarehouseCard(
+                        warehouse: wh,
+                        isSelected:
+                            controller.selectedWarehouse.value?.id == wh.id,
+                        distance: controller.getDistanceString(wh),
+                        onTap: () => controller.selectWarehouse(wh),
+                        onNavigate: () => controller.navigateToGoogleMaps(wh),
+                      ),
+                    ),
                   ),
 
                   const SizedBox(height: 16),
@@ -233,7 +226,6 @@ class WarehouseMapView extends GetView<WarehouseMapController> {
           ),
         ],
       ),
-      bottomNavigationBar: const AppBottomNav(currentIndex: 3),
     );
   }
 
@@ -261,18 +253,14 @@ class WarehouseMapView extends GetView<WarehouseMapController> {
           // Warehouse markers
           MarkerLayer(
             markers: controller.warehouses.map((w) {
-              final isSelected =
-                  controller.selectedWarehouse.value?.id == w.id;
+              final isSelected = controller.selectedWarehouse.value?.id == w.id;
               return Marker(
                 point: w.position,
                 width: isSelected ? 90 : 70,
                 height: isSelected ? 55 : 40,
                 child: GestureDetector(
                   onTap: () => controller.selectWarehouse(w),
-                  child: _WarehouseMarker(
-                    code: w.code,
-                    isSelected: isSelected,
-                  ),
+                  child: _WarehouseMarker(code: w.code, isSelected: isSelected),
                 ),
               );
             }).toList(),
@@ -374,9 +362,7 @@ class _MapBtn extends StatelessWidget {
           color: isPrimary ? AppColors.primary : AppColors.surface,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: isPrimary
-                ? AppColors.primary
-                : AppColors.border,
+            color: isPrimary ? AppColors.primary : AppColors.border,
           ),
           boxShadow: [
             BoxShadow(
@@ -608,17 +594,16 @@ class _WarehouseCard extends StatelessWidget {
                     children: [
                       Text(warehouse.name, style: AppTextStyles.subtitle),
                       const SizedBox(height: 2),
-                      Text(
-                        warehouse.address,
-                        style: AppTextStyles.caption,
-                      ),
+                      Text(warehouse.address, style: AppTextStyles.caption),
                     ],
                   ),
                 ),
                 // Distance badge
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: AppColors.primary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),

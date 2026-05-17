@@ -1,5 +1,4 @@
 import 'package:get/get.dart';
-import 'package:flutter/material.dart';
 import '../../../data/auth_service.dart';
 
 class LoginController extends GetxController {
@@ -32,6 +31,18 @@ class LoginController extends GetxController {
       isLoading.value = false;
 
       if (ok) {
+        final profile = await AuthService.getProfile(forceRefresh: true);
+        final role = (profile?['role'] ?? '').toString().toLowerCase();
+
+        if (role != 'staff') {
+          await AuthService.logout();
+          Get.snackbar(
+            'Akses Ditolak',
+            'Hanya pengguna dengan role staff yang dapat masuk',
+          );
+          return;
+        }
+
         Get.offAllNamed('/home');
       } else {
         Get.snackbar('Login Gagal', 'Periksa kredensial atau koneksi');

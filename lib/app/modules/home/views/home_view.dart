@@ -55,21 +55,21 @@ class HomeView extends GetView<HomeController> {
                       children: [
                         _StatCard(
                           label: 'Pinjaman Aktif',
-                          value: controller.borrowedCount.value.toString(),
+                          value: controller.activeLoansCount.value.toString(),
                           icon: Icons.inventory_2_rounded,
                           color: AppColors.primary,
                         ),
                         const SizedBox(width: 10),
                         _StatCard(
                           label: 'Menunggu',
-                          value: controller.maintenanceCount.value.toString(),
+                          value: controller.pendingLoansCount.value.toString(),
                           icon: Icons.hourglass_top_rounded,
                           color: AppColors.statusPending,
                         ),
                         const SizedBox(width: 10),
                         _StatCard(
                           label: 'Riwayat',
-                          value: controller.totalCount.value.toString(),
+                          value: controller.totalLoansCount.value.toString(),
                           icon: Icons.history_rounded,
                           color: AppColors.statusReturned,
                         ),
@@ -173,20 +173,31 @@ class HomeView extends GetView<HomeController> {
                     title: 'Pinjaman Aktif Saya',
                     onMore: () => Get.toNamed(Routes.MY_LOANS),
                   ),
-                  const SizedBox(height: 10),
-                  _ActiveLoanCard(
-                    name: 'Laptop Dell XPS 13',
-                    due: 'Due: 18 Apr 2026',
-                    icon: Icons.laptop_rounded,
-                    daysLeft: 3,
-                  ),
-                  const SizedBox(height: 8),
-                  _ActiveLoanCard(
-                    name: 'Proyektor Epson',
-                    due: 'Due: 20 Apr 2026',
-                    icon: Icons.screenshot_monitor_rounded,
-                    daysLeft: 5,
-                  ),
+                  Obx(() {
+                    if (controller.myActiveLoans.isEmpty) {
+                      return const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 10),
+                        child: Text(
+                          'Belum ada pinjaman aktif.',
+                          style: TextStyle(color: AppColors.textSecondary),
+                        ),
+                      );
+                    }
+                    return Column(
+                      children: controller.myActiveLoans.map((loan) {
+                        final daysLeft = loan.dueDate.difference(DateTime.now()).inDays;
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 8),
+                          child: _ActiveLoanCard(
+                            name: loan.item.name,
+                            due: 'Due: ${loan.dueDate.day}/${loan.dueDate.month}/${loan.dueDate.year}',
+                            icon: Icons.inventory_rounded,
+                            daysLeft: daysLeft < 0 ? 0 : daysLeft,
+                          ),
+                        );
+                      }).toList(),
+                    );
+                  }),
                   const SizedBox(height: 20),
 
                   // ── Available Items ───────────────────────────

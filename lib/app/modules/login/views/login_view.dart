@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../theme/app_theme.dart';
-import '../../../routes/app_pages.dart';
 import '../controllers/login_controller.dart';
 
 class LoginView extends GetView<LoginController> {
@@ -23,28 +22,43 @@ class LoginView extends GetView<LoginController> {
             children: [
               const SizedBox(height: 56),
 
-              // ── Logo ──────────────────────────────────────
+              // Logo
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const Text(
                     'LOK',
-                    style: TextStyle(color: AppColors.textPrimary, fontSize: 32, fontWeight: FontWeight.w800, letterSpacing: -1),
+                    style: TextStyle(
+                      color: AppColors.textPrimary,
+                      fontSize: 32,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -1,
+                    ),
                   ),
                   Text(
                     'AS',
-                    style: TextStyle(color: AppColors.primaryLight, fontSize: 32, fontWeight: FontWeight.w800, letterSpacing: -1),
+                    style: TextStyle(
+                      color: AppColors.primaryLight,
+                      fontSize: 32,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -1,
+                    ),
                   ),
                 ],
               ),
               const SizedBox(height: 8),
               Text(
                 'ASSET SECURITY INFRASTRUCTURE',
-                style: TextStyle(color: AppColors.textHint, fontSize: 10, letterSpacing: 1.5, fontWeight: FontWeight.w700),
+                style: TextStyle(
+                  color: AppColors.textHint,
+                  fontSize: 10,
+                  letterSpacing: 1.5,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
               const SizedBox(height: 48),
 
-              // ── Title ─────────────────────────────────────
+              // Title
               Text('System Access', style: AppTextStyles.headline),
               const SizedBox(height: 6),
               Text(
@@ -53,7 +67,7 @@ class LoginView extends GetView<LoginController> {
               ),
               const SizedBox(height: 40),
 
-              // ── Form Card ─────────────────────────────────
+              // Form Card
               Container(
                 decoration: AppDecoration.card,
                 padding: const EdgeInsets.all(24),
@@ -124,9 +138,9 @@ class LoginView extends GetView<LoginController> {
                           onPressed: controller.isLoading.value
                               ? null
                               : () => controller.login(
-                                    email: emailCtrl.text.trim(),
-                                    password: passCtrl.text,
-                                  ),
+                                  email: emailCtrl.text.trim(),
+                                  password: passCtrl.text,
+                                ),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.transparent,
                             shadowColor: Colors.transparent,
@@ -153,7 +167,11 @@ class LoginView extends GetView<LoginController> {
                                       ),
                                     ),
                                     SizedBox(width: 8),
-                                    Icon(Icons.login_rounded, size: 18, color: Colors.white),
+                                    Icon(
+                                      Icons.login_rounded,
+                                      size: 18,
+                                      color: Colors.white,
+                                    ),
                                   ],
                                 ),
                         ),
@@ -164,7 +182,7 @@ class LoginView extends GetView<LoginController> {
               ),
               const SizedBox(height: 20),
 
-              // ── Footer ────────────────────────────────────
+              // Footer
               Text('Akun didaftarkan oleh Admin', style: AppTextStyles.caption),
               const SizedBox(height: 32),
             ],
