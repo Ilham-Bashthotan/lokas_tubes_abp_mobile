@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../data/item_model.dart';
+import '../../../data/loan_model.dart';
 import '../../../theme/app_theme.dart';
 import '../../../routes/app_pages.dart';
 import '../../../widgets/app_bottom_nav.dart';
@@ -31,10 +32,51 @@ class HomeView extends GetView<HomeController> {
               ),
             ),
             actions: [
-              IconButton(
-                icon: const Icon(Icons.notifications_none_rounded),
-                onPressed: () {},
-              ),
+              Obx(() {
+                final unread = controller.unreadCount.value;
+                return Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    IconButton(
+                      icon: const Icon(
+                        Icons.notifications_none_rounded,
+                        size: 24,
+                      ),
+                      onPressed: () => Get.toNamed(Routes.NOTIFICATIONS),
+                    ),
+                    if (unread > 0)
+                      Positioned(
+                        right: 6,
+                        top: 6,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 4,
+                            vertical: 2,
+                          ),
+                          decoration: const BoxDecoration(
+                            color: AppColors.statusOverdue,
+                            shape: BoxShape.circle,
+                          ),
+                          constraints: const BoxConstraints(
+                            minWidth: 16,
+                            minHeight: 16,
+                          ),
+                          child: Center(
+                            child: Text(
+                              unread > 99 ? '99+' : '$unread',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 8,
+                                fontWeight: FontWeight.w900,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                );
+              }),
               const SizedBox(width: 8),
             ],
             bottom: PreferredSize(
@@ -168,32 +210,26 @@ class HomeView extends GetView<HomeController> {
                   ),
                   const SizedBox(height: 20),
 
-                  // ── Active Loans ──────────────────────────────
+                  // ── Pinjaman Saya ──────────────────────────────
                   _SectionHeader(
-                    title: 'Pinjaman Aktif Saya',
+                    title: 'Pinjaman Saya',
                     onMore: () => Get.toNamed(Routes.MY_LOANS),
                   ),
                   Obx(() {
-                    if (controller.myActiveLoans.isEmpty) {
+                    if (controller.myLoans.isEmpty) {
                       return const Padding(
                         padding: EdgeInsets.symmetric(vertical: 10),
                         child: Text(
-                          'Belum ada pinjaman aktif.',
+                          'Belum ada pinjaman.',
                           style: TextStyle(color: AppColors.textSecondary),
                         ),
                       );
                     }
                     return Column(
-                      children: controller.myActiveLoans.map((loan) {
-                        final daysLeft = loan.dueDate.difference(DateTime.now()).inDays;
+                      children: controller.myLoans.map((loan) {
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 8),
-                          child: _ActiveLoanCard(
-                            name: loan.item.name,
-                            due: 'Due: ${loan.dueDate.day}/${loan.dueDate.month}/${loan.dueDate.year}',
-                            icon: Icons.inventory_rounded,
-                            daysLeft: daysLeft < 0 ? 0 : daysLeft,
-                          ),
+                          child: _LoanCard(loan: loan),
                         );
                       }).toList(),
                     );
@@ -206,41 +242,39 @@ class HomeView extends GetView<HomeController> {
                     onMore: () => Get.toNamed(Routes.ITEMS),
                   ),
                   const SizedBox(height: 10),
-                  Obx(
-                    () {
-                      if (controller.isLoading.value) {
-                        return const Center(
-                          child: Padding(
-                            padding: EdgeInsets.symmetric(vertical: 20),
-                            child: CircularProgressIndicator(),
-                          ),
-                        );
-                      }
-
-                      if (controller.availableItems.isEmpty) {
-                        return Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.symmetric(vertical: 20),
-                          child: const Text(
-                            'Tidak ada barang tersedia saat ini.',
-                            style: TextStyle(color: AppColors.textSecondary),
-                            textAlign: TextAlign.center,
-                          ),
-                        );
-                      }
-
-                      return Column(
-                        children: controller.availableItems
-                            .map(
-                              (item) => Padding(
-                                padding: const EdgeInsets.only(bottom: 8),
-                                child: _AvailableItemCard(item: item),
-                              ),
-                            )
-                            .toList(),
+                  Obx(() {
+                    if (controller.isLoading.value) {
+                      return const Center(
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(vertical: 20),
+                          child: CircularProgressIndicator(),
+                        ),
                       );
-                    },
-                  ),
+                    }
+
+                    if (controller.availableItems.isEmpty) {
+                      return Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(vertical: 20),
+                        child: const Text(
+                          'Tidak ada barang tersedia saat ini.',
+                          style: TextStyle(color: AppColors.textSecondary),
+                          textAlign: TextAlign.center,
+                        ),
+                      );
+                    }
+
+                    return Column(
+                      children: controller.availableItems
+                          .map(
+                            (item) => Padding(
+                              padding: const EdgeInsets.only(bottom: 8),
+                              child: _AvailableItemCard(item: item),
+                            ),
+                          )
+                          .toList(),
+                    );
+                  }),
                   const SizedBox(height: 16),
                 ],
               ),
@@ -334,21 +368,62 @@ class _SectionHeader extends StatelessWidget {
   }
 }
 
-class _ActiveLoanCard extends StatelessWidget {
-  final String name, due;
-  final IconData icon;
-  final int daysLeft;
-  const _ActiveLoanCard({
-    required this.name,
-    required this.due,
-    required this.icon,
-    required this.daysLeft,
-  });
+class _LoanCard extends StatelessWidget {
+  final Loan loan;
+  const _LoanCard({required this.loan});
 
   @override
   Widget build(BuildContext context) {
-    final isUrgent = daysLeft <= 3;
-    final color = isUrgent ? AppColors.statusOverdue : AppColors.statusActive;
+    final isPending = loan.status == 'pending';
+
+    // Konfigurasi warna, teks status, dan lencana berdasarkan status pinjaman
+    Color color;
+    String subtitle;
+    Widget statusBadge;
+
+    if (isPending) {
+      color = AppColors.statusPending;
+      subtitle = 'Menunggu persetujuan';
+      statusBadge = Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.12),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: color.withValues(alpha: 0.3)),
+        ),
+        child: Text(
+          'Menunggu',
+          style: TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w700,
+            color: color,
+          ),
+        ),
+      );
+    } else {
+      final daysLeft = loan.dueDate.difference(DateTime.now()).inDays;
+      final isUrgent = daysLeft <= 3;
+      color = isUrgent ? AppColors.statusOverdue : AppColors.statusActive;
+      subtitle =
+          'Due: ${loan.dueDate.day}/${loan.dueDate.month}/${loan.dueDate.year}';
+      statusBadge = Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.12),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: color.withValues(alpha: 0.3)),
+        ),
+        child: Text(
+          '${daysLeft < 0 ? 0 : daysLeft} hr',
+          style: TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w700,
+            color: color,
+          ),
+        ),
+      );
+    }
+
     return Container(
       decoration: AppDecoration.card,
       padding: const EdgeInsets.all(14),
@@ -358,38 +433,31 @@ class _ActiveLoanCard extends StatelessWidget {
             width: 44,
             height: 44,
             decoration: BoxDecoration(
-              color: AppColors.primarySurface,
+              color: isPending
+                  ? AppColors.statusPending.withValues(alpha: 0.1)
+                  : AppColors.primarySurface,
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(icon, color: AppColors.primary, size: 22),
+            child: Icon(
+              isPending
+                  ? Icons.hourglass_empty_rounded
+                  : Icons.inventory_rounded,
+              color: isPending ? AppColors.statusPending : AppColors.primary,
+              size: 22,
+            ),
           ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(name, style: AppTextStyles.subtitle),
+                Text(loan.item.name, style: AppTextStyles.subtitle),
                 const SizedBox(height: 2),
-                Text(due, style: AppTextStyles.caption),
+                Text(subtitle, style: AppTextStyles.caption),
               ],
             ),
           ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: color.withValues(alpha: 0.3)),
-            ),
-            child: Text(
-              '$daysLeft hr',
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w700,
-                color: color,
-              ),
-            ),
-          ),
+          statusBadge,
         ],
       ),
     );
@@ -417,7 +485,9 @@ class _AvailableItemCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Icon(
-                item.status == 'available' ? Icons.inventory_2_rounded : Icons.device_unknown_rounded,
+                item.status == 'available'
+                    ? Icons.inventory_2_rounded
+                    : Icons.device_unknown_rounded,
                 color: AppColors.statusAvailable,
                 size: 22,
               ),

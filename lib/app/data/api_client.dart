@@ -1,6 +1,9 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:get/get.dart' hide Response;
 import 'auth_service.dart';
+import '../routes/app_pages.dart';
 
 class ApiClient {
   ApiClient._();
@@ -33,6 +36,14 @@ class ApiClient {
             options.headers['Authorization'] = 'Bearer $token';
           }
           handler.next(options);
+        },
+        onError: (DioException e, handler) async {
+          if (e.response?.statusCode == 401) {
+            debugPrint('[API] Terjadi error 401 Unauthorized. Mengeluarkan sesi dan kembali ke Login.');
+            await AuthService.logout();
+            Get.offAllNamed(Routes.LOGIN);
+          }
+          handler.next(e);
         },
       ),
     );

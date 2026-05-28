@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../data/auth_service.dart';
+import '../../../data/fcm_service.dart';
 import '../../../routes/app_pages.dart';
 
 class ProfileController extends GetxController {
@@ -79,6 +80,12 @@ class ProfileController extends GetxController {
 
     if (confirmed == true) {
       isLoggingOut.value = true;
+      
+      // Hapus token perangkat FCM di Laravel sebelum logout
+      if (Get.isRegistered<FcmService>()) {
+        await FcmService.to.removeDeviceTokenOnLogout();
+      }
+
       await AuthService.logout();
       isLoggingOut.value = false;
       Get.offAllNamed(Routes.LOGIN);

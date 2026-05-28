@@ -134,7 +134,7 @@ cd public
 5. Jalankan server Laravel dengan host IP lokal tersebut (contoh):
 
 ```bash
-php -S 192.168.18.103:8000
+php -S [IP_ADDRESS]
 ```
 
 > Gunakan IP milik perangkat kamu sendiri dari hasil `ipconfig`, jangan selalu pakai IP contoh di atas.
@@ -144,12 +144,21 @@ php -S 192.168.18.103:8000
 Setelah backend berjalan, buat file `.env` di root project Flutter ini, lalu isi:
 
 ```dotenv
-BASE_URL=http://192.168.18.103:8000/api/
+BASE_URL=http://[IP_ADDRESS]/api/
 ```
 
-Ganti `192.168.18.103` dengan IP lokal kamu dari langkah `ipconfig`.
+Ganti `[IP_ADDRESS]` dengan IP lokal kamu dari langkah `ipconfig`.
 
-### 4. Build & Run Aplikasi
+### 4. Konfigurasi Firebase (FCM)
+
+Aplikasi mobile ini menggunakan Firebase Cloud Messaging (FCM) untuk notifikasi native real-time. Konfigurasikan kredensial Firebase klien Anda sebagai berikut:
+1. Daftarkan aplikasi Android Anda ke **Firebase Console** dengan nama paket wajib: `com.tubesabp.lokas_tubes_abp_mobile`.
+2. Unduh file konfigurasi **`google-services.json`** yang dihasilkan oleh Firebase.
+3. Pindahkan file tersebut ke direktori berikut di dalam project Flutter Anda:
+   `android/app/google-services.json`
+*(Catatan: File ini sudah terdaftar di `.gitignore` untuk melindungi informasi API key klien Anda).*
+
+### 5. Build & Run Aplikasi
 
 Pastikan emulator sudah berjalan atau perangkat fisik sudah terhubung (USB debugging aktif).
 
