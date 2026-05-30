@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import '../../../theme/app_theme.dart';
 import '../../../routes/app_pages.dart';
 import '../../../widgets/app_bottom_nav.dart';
@@ -12,41 +13,6 @@ class MyLoansView extends GetView<MyLoansController> {
   Widget build(BuildContext context) {
     final activeFilter = 0.obs;
     final filters = ['Semua', 'Active', 'Pending', 'Returned'];
-
-    final loans = [
-      _LoanItem(
-        name: 'Laptop Dell XPS 13',
-        period: '01 Apr – 08 Apr 2026',
-        status: 'Overdue',
-        statusColor: AppColors.statusOverdue,
-        icon: Icons.laptop_rounded,
-        canReturn: true,
-      ),
-      _LoanItem(
-        name: 'Proyektor Epson',
-        period: '05 Apr – 12 Apr 2026',
-        status: 'Active',
-        statusColor: AppColors.statusActive,
-        icon: Icons.screenshot_monitor_rounded,
-        canReturn: true,
-      ),
-      _LoanItem(
-        name: 'Mic Wireless Shure',
-        period: '01 Mar – 07 Mar 2026',
-        status: 'Returned',
-        statusColor: AppColors.statusReturned,
-        icon: Icons.mic_rounded,
-        canReturn: false,
-      ),
-      _LoanItem(
-        name: 'Kamera Canon EOS',
-        period: '07 Apr – 14 Apr 2026',
-        status: 'Pending',
-        statusColor: AppColors.statusPending,
-        icon: Icons.camera_alt_rounded,
-        canReturn: false,
-      ),
-    ];
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -68,33 +34,40 @@ class MyLoansView extends GetView<MyLoansController> {
       body: Column(
         children: [
           // Stats banner
-          Container(
-            color: AppColors.surface,
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-            child: Row(
-              children: [
-                _StatBox(label: 'Total', value: '8', color: AppColors.primary),
-                const SizedBox(width: 10),
-                _StatBox(
-                  label: 'Aktif',
-                  value: '2',
-                  color: AppColors.statusActive,
-                ),
-                const SizedBox(width: 10),
-                _StatBox(
-                  label: 'Pending',
-                  value: '1',
-                  color: AppColors.statusPending,
-                ),
-                const SizedBox(width: 10),
-                _StatBox(
-                  label: 'Overdue',
-                  value: '1',
-                  color: AppColors.statusOverdue,
-                ),
-              ],
-            ),
-          ),
+          Obx(() {
+            final total = controller.totalCount.value;
+            final active = controller.activeCount.value;
+            final pending = controller.pendingCount.value;
+            final overdue = controller.overdueCount.value;
+
+            return Container(
+              color: AppColors.surface,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+              child: Row(
+                children: [
+                  _StatBox(label: 'Total', value: total.toString(), color: AppColors.primary),
+                  const SizedBox(width: 10),
+                  _StatBox(
+                    label: 'Aktif',
+                    value: active.toString(),
+                    color: AppColors.statusActive,
+                  ),
+                  const SizedBox(width: 10),
+                  _StatBox(
+                    label: 'Pending',
+                    value: pending.toString(),
+                    color: AppColors.statusPending,
+                  ),
+                  const SizedBox(width: 10),
+                  _StatBox(
+                    label: 'Overdue',
+                    value: overdue.toString(),
+                    color: AppColors.statusOverdue,
+                  ),
+                ],
+              ),
+            );
+          }),
           // Filter chips
           Container(
             color: AppColors.surface,
@@ -110,7 +83,11 @@ class MyLoansView extends GetView<MyLoansController> {
                       child: _FilterChip(
                         label: filters[i],
                         active: activeFilter.value == i,
-                        onTap: () => activeFilter.value = i,
+                        onTap: () {
+                          activeFilter.value = i;
+                          final statusMap = ['all', 'active', 'pending', 'returned'];
+                          controller.filterStatus(statusMap[i]);
+                        },
                       ),
                     ),
                   ),
@@ -121,12 +98,73 @@ class MyLoansView extends GetView<MyLoansController> {
           Container(height: 1, color: AppColors.divider),
           // List
           Expanded(
-            child: ListView.separated(
-              padding: const EdgeInsets.all(16),
-              itemCount: loans.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 10),
-              itemBuilder: (_, i) => _LoanCard(loan: loans[i]),
-            ),
+            child: Obx(() {
+              if (controller.isLoading.value) {
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
+              }
+
+              if (controller.loans.isEmpty) {
+                return const Center(
+                  child: Text(
+                    'Tidak ada data peminjaman',
+                    style: TextStyle(color: AppColors.textSecondary),
+                  ),
+                );
+              }
+
+              return ListView.separated(
+                padding: const EdgeInsets.all(16),
+                itemCount: controller.loans.length,
+                separatorBuilder: (_, __) => const SizedBox(height: 10),
+                itemBuilder: (_, i) {
+                  final realLoan = controller.loans[i];
+                  
+                  final statusStr = realLoan.status;
+                  Color statusColor = AppColors.statusPending;
+                  if (statusStr == 'active' || statusStr == 'borrowed') {
+                    statusColor = AppColors.statusActive;
+                  } else if (statusStr == 'returned') {
+                    statusColor = AppColors.statusReturned;
+                  } else if (statusStr == 'overdue') {
+                    statusColor = AppColors.statusOverdue;
+                  }
+
+                  IconData loanIcon = Icons.laptop_rounded;
+                  final itemNameLower = realLoan.item.name.toLowerCase();
+                  if (itemNameLower.contains('proyektor') || itemNameLower.contains('projector')) {
+                    loanIcon = Icons.screenshot_monitor_rounded;
+                  } else if (itemNameLower.contains('kamera') || itemNameLower.contains('camera')) {
+                    loanIcon = Icons.camera_alt_rounded;
+                  } else if (itemNameLower.contains('mic') || itemNameLower.contains('micro')) {
+                    loanIcon = Icons.mic_rounded;
+                  }
+
+                  final loanDateStr = DateFormat('dd MMM').format(realLoan.loanDate);
+                  final dueDateStr = DateFormat('dd MMM yyyy').format(realLoan.dueDate);
+                  final periodStr = '$loanDateStr – $dueDateStr';
+
+                  final canReturn = statusStr == 'active' || statusStr == 'overdue' || statusStr == 'borrowed';
+
+                  final displayItem = _LoanItem(
+                    name: realLoan.item.name,
+                    period: periodStr,
+                    status: statusStr.toUpperCase(),
+                    statusColor: statusColor,
+                    icon: loanIcon,
+                    canReturn: canReturn,
+                  );
+
+                  return _LoanCard(
+                    loan: displayItem,
+                    onReturnPressed: () {
+                      Get.toNamed(Routes.RETURN_FORM, arguments: realLoan);
+                    },
+                  );
+                },
+              );
+            }),
           ),
         ],
       ),
@@ -231,7 +269,11 @@ class _FilterChip extends StatelessWidget {
 
 class _LoanCard extends StatelessWidget {
   final _LoanItem loan;
-  const _LoanCard({required this.loan});
+  final VoidCallback onReturnPressed;
+  const _LoanCard({
+    required this.loan,
+    required this.onReturnPressed,
+  });
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -292,7 +334,7 @@ class _LoanCard extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: OutlinedButton.icon(
-                onPressed: () => Get.toNamed(Routes.RETURN_FORM),
+                onPressed: onReturnPressed,
                 icon: const Icon(Icons.assignment_return_rounded, size: 16),
                 label: const Text('Kembalikan Barang'),
                 style: OutlinedButton.styleFrom(

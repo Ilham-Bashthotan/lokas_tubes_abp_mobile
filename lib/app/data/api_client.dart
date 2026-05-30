@@ -1,21 +1,18 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:get/get.dart' hide Response;
+import 'auth_service.dart';
+import '../routes/app_pages.dart';
 
 class ApiClient {
   ApiClient._();
-
-  static final FlutterSecureStorage _storage = const FlutterSecureStorage();
 
   static String _baseUrl() {
     final envUrl = dotenv.env['BASE_URL'];
     return envUrl != null && envUrl.isNotEmpty
         ? envUrl
         : 'http://api.lokas-tubes-abp.test/api/';
-  }
-
-  static Future<String?> _getToken() async {
-    return await _storage.read(key: 'auth_token');
   }
 
   static Dio _buildDio() {
@@ -34,11 +31,19 @@ class ApiClient {
     dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
-          final token = await _getToken();
+          final token = await AuthService.getToken();
           if (token != null && token.isNotEmpty) {
             options.headers['Authorization'] = 'Bearer $token';
           }
           handler.next(options);
+        },
+        onError: (DioException e, handler) async {
+          if (e.response?.statusCode == 401) {
+            debugPrint('[API] Terjadi error 401 Unauthorized. Mengeluarkan sesi dan kembali ke Login.');
+            await AuthService.logout();
+            Get.offAllNamed(Routes.LOGIN);
+          }
+          handler.next(e);
         },
       ),
     );

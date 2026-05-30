@@ -1,6 +1,6 @@
 import 'package:get/get.dart';
 
-import '../../../data/dummy_items.dart';
+import '../../../data/items_service.dart';
 import '../../../data/item_model.dart';
 
 class ItemsController extends GetxController {
@@ -25,14 +25,14 @@ class ItemsController extends GetxController {
     errorMessage.value = null;
 
     try {
-      await Future.delayed(const Duration(milliseconds: 250));
-      final result = DummyItems.getItems(
+      final paged = await ItemsService.fetchItems(
         status: selectedStatus.value != 'all' ? selectedStatus.value : null,
         search: search.value,
+        page: currentPage.value,
       );
-      items.assignAll(result);
-      totalItems.value = result.length;
-      lastPage.value = 1;
+      items.assignAll(paged.items);
+      totalItems.value = paged.total;
+      lastPage.value = paged.lastPage;
     } catch (_) {
       errorMessage.value = 'Terjadi kesalahan saat memuat data.';
     } finally {

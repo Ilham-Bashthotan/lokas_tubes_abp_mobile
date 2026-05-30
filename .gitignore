@@ -45,3 +45,13 @@ app.*.map.json
 /android/app/release
 
 /.env
+
+# Firebase config files containing API keys and project settings
+/android/app/google-services.json
+/ios/Runner/GoogleService-Info.plist
+
+# Keystore & Android release keys/secrets
+/android/key.properties
+/android/app/*.jks
+/android/app/*.keystore
+

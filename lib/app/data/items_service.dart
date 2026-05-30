@@ -49,17 +49,24 @@ class ItemsService {
     }
 
     final data = response.data as Map<String, dynamic>;
-    final itemsJson = data['data'] as List<dynamic>;
-    final meta = data['meta'] as Map<String, dynamic>;
+    final itemsJson = (data['data'] as List? ?? []);
+    final meta = (data['meta'] as Map? ?? {});
+
+    int parseInt(dynamic value) {
+      if (value is int) return value;
+      if (value is String) return int.tryParse(value) ?? 0;
+      if (value is double) return value.toInt();
+      return 0;
+    }
 
     return PagedItems(
       items: itemsJson
           .map((itemJson) => Item.fromJson(Map<String, dynamic>.from(itemJson as Map)))
           .toList(),
-      currentPage: meta['current_page'] as int,
-      perPage: meta['per_page'] as int,
-      total: meta['total'] as int,
-      lastPage: meta['last_page'] as int,
+      currentPage: parseInt(meta['current_page']),
+      perPage: parseInt(meta['per_page']),
+      total: parseInt(meta['total']),
+      lastPage: parseInt(meta['last_page']),
     );
   }
 
@@ -71,7 +78,23 @@ class ItemsService {
     }
 
     final data = response.data as Map<String, dynamic>;
-    final itemJson = Map<String, dynamic>.from(data['data'] as Map);
+    final itemData = data['data'];
+    if (itemData == null) throw Exception('Item data not found');
+    final itemJson = Map<String, dynamic>.from(itemData as Map);
+    return Item.fromJson(itemJson);
+  }
+
+  static Future<Item> fetchItemByQr(String qrCode) async {
+    final response = await ApiClient.dio.get('items/qr/$qrCode');
+
+    if (response.statusCode != 200) {
+      throw DioException(requestOptions: response.requestOptions, response: response);
+    }
+
+    final data = response.data as Map<String, dynamic>;
+    final itemData = data['data'];
+    if (itemData == null) throw Exception('Item data not found');
+    final itemJson = Map<String, dynamic>.from(itemData as Map);
     return Item.fromJson(itemJson);
   }
 

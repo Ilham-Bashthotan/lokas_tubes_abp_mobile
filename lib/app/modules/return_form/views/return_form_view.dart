@@ -1,5 +1,7 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import '../../../theme/app_theme.dart';
 import '../../../routes/app_pages.dart';
 import '../controllers/return_form_controller.dart';
@@ -9,8 +11,8 @@ class ReturnFormView extends GetView<ReturnFormController> {
 
   @override
   Widget build(BuildContext context) {
-    final selectedCondition = 0.obs; // 0=Good, 1=Damaged
-    final conditions = ['Good', 'Damaged'];
+    final conditions = ['good', 'damaged'];
+    final conditionLabels = ['Good', 'Damaged'];
     final conditionIcons = [
       Icons.check_circle_rounded,
       Icons.warning_amber_rounded,
@@ -41,44 +43,58 @@ class ReturnFormView extends GetView<ReturnFormController> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Item Card
-            Container(
-              decoration: AppDecoration.card,
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  Container(
-                    width: 52,
-                    height: 52,
-                    decoration: BoxDecoration(
-                      color: AppColors.primarySurface,
-                      borderRadius: BorderRadius.circular(12),
+            Obx(() {
+              final loan = controller.loanData.value;
+              final itemName = loan?.item.name ?? 'Memuat data...';
+              final loanDateStr = loan != null
+                  ? DateFormat('dd MMM').format(loan.loanDate)
+                  : '';
+              final dueDateStr = loan != null
+                  ? DateFormat('dd MMM yyyy').format(loan.dueDate)
+                  : '';
+              final subtitleText = loan != null
+                  ? 'Dipinjam: $loanDateStr · Due: $dueDateStr'
+                  : 'Mohon tunggu...';
+
+              return Container(
+                decoration: AppDecoration.card,
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 52,
+                      height: 52,
+                      decoration: BoxDecoration(
+                        color: AppColors.primarySurface,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(
+                        Icons.laptop_rounded,
+                        color: AppColors.primary,
+                        size: 28,
+                      ),
                     ),
-                    child: const Icon(
-                      Icons.laptop_rounded,
-                      color: AppColors.primary,
-                      size: 28,
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            itemName,
+                            style: AppTextStyles.subtitle,
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            subtitleText,
+                            style: AppTextStyles.caption,
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Laptop Dell XPS 13',
-                          style: AppTextStyles.subtitle,
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          'Dipinjam: 01 Apr · Due: 08 Apr 2026',
-                          style: AppTextStyles.caption,
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
+                  ],
+                ),
+              );
+            }),
             const SizedBox(height: 24),
 
             // Kondisi section
@@ -87,12 +103,13 @@ class ReturnFormView extends GetView<ReturnFormController> {
             Obx(
               () => Row(
                 children: List.generate(conditions.length, (i) {
-                  final active = selectedCondition.value == i;
+                  final condValue = conditions[i];
+                  final active = controller.conditionAfter.value == condValue;
                   return Expanded(
                     child: Padding(
                       padding: EdgeInsets.only(right: i == 0 ? 8 : 0),
                       child: GestureDetector(
-                        onTap: () => selectedCondition.value = i,
+                        onTap: () => controller.setCondition(condValue),
                         child: AnimatedContainer(
                           duration: const Duration(milliseconds: 200),
                           padding: const EdgeInsets.symmetric(vertical: 16),
@@ -119,7 +136,7 @@ class ReturnFormView extends GetView<ReturnFormController> {
                               ),
                               const SizedBox(height: 6),
                               Text(
-                                conditions[i],
+                                conditionLabels[i],
                                 style: TextStyle(
                                   fontSize: 13,
                                   fontWeight: active
@@ -144,52 +161,145 @@ class ReturnFormView extends GetView<ReturnFormController> {
             // Photo section
             _SectionLabel('Foto Kondisi Saat Kembali'),
             const SizedBox(height: 8),
-            GestureDetector(
-              onTap: () => Get.toNamed(Routes.CAMERA),
-              child: Container(
-                height: 110,
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: AppColors.statusActive.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: AppColors.statusActive.withValues(alpha: 0.3),
-                    width: 1.5,
-                  ),
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+            Obx(() {
+              if (controller.photoPath.value.isNotEmpty) {
+                return Stack(
                   children: [
                     Container(
-                      padding: const EdgeInsets.all(10),
+                      height: 160,
+                      width: double.infinity,
                       decoration: BoxDecoration(
-                        color: AppColors.primary.withValues(alpha: 0.1),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.camera_alt_rounded,
-                        color: AppColors.primary,
-                        size: 26,
+                        borderRadius: BorderRadius.circular(8),
+                        image: DecorationImage(
+                          image: FileImage(File(controller.photoPath.value)),
+                          fit: BoxFit.cover,
+                        ),
+                        border: Border.all(
+                          color: AppColors.statusActive.withValues(alpha: 0.3),
+                          width: 1.5,
+                        ),
                       ),
                     ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Tap untuk buka kamera',
-                      style: AppTextStyles.caption.copyWith(
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.w600,
+                    Positioned(
+                      top: 8,
+                      right: 8,
+                      child: GestureDetector(
+                        onTap: () => controller.setPhotoPath(''),
+                        child: Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: const BoxDecoration(
+                            color: Colors.black54,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.close_rounded,
+                            color: Colors.white,
+                            size: 16,
+                          ),
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      bottom: 8,
+                      right: 8,
+                      child: GestureDetector(
+                        onTap: () async {
+                          final result = await Get.toNamed(Routes.CAMERA);
+                          if (result is String && result.isNotEmpty) {
+                            controller.setPhotoPath(result);
+                          }
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary,
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: const [
+                              Icon(
+                                Icons.camera_alt_rounded,
+                                color: Colors.white,
+                                size: 14,
+                              ),
+                              SizedBox(width: 4),
+                              Text(
+                                'Ubah Foto',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
                     ),
                   ],
-                ),
-              ),
-            ),
+                );
+              } else {
+                return GestureDetector(
+                  onTap: () async {
+                    final result = await Get.toNamed(Routes.CAMERA);
+                    if (result is String && result.isNotEmpty) {
+                      controller.setPhotoPath(result);
+                    }
+                  },
+                  child: Container(
+                    height: 110,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.statusActive.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: AppColors.statusActive.withValues(alpha: 0.3),
+                        width: 1.5,
+                      ),
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withValues(alpha: 0.1),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.camera_alt_rounded,
+                            color: AppColors.primary,
+                            size: 26,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Tap untuk buka kamera',
+                          style: AppTextStyles.caption.copyWith(
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }
+            }),
             const SizedBox(height: 20),
 
             // Notes
             _SectionLabel('Catatan (opsional)'),
             TextFormField(
               maxLines: 3,
+              onChanged: controller.setNote,
               decoration: const InputDecoration(
                 hintText: 'Terdapat lecetan kecil di sudut...',
               ),
@@ -197,35 +307,51 @@ class ReturnFormView extends GetView<ReturnFormController> {
             const SizedBox(height: 32),
 
             // Confirm button
-            ElevatedButton(
-              onPressed: () => Get.offAllNamed(Routes.MY_LOANS),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.statusReturned,
-                minimumSize: const Size(double.infinity, 52),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
+            Obx(() {
+              final isValid = controller.isValid;
+              final isLoading = controller.isLoading.value;
+              return ElevatedButton(
+                onPressed: (isValid && !isLoading)
+                    ? () => controller.submitReturn()
+                    : null,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.statusReturned,
+                  disabledBackgroundColor: Colors.grey.shade300,
+                  minimumSize: const Size(double.infinity, 52),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                 ),
-              ),
-              child: const Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.check_circle_rounded,
-                    color: Colors.white,
-                    size: 20,
-                  ),
-                  SizedBox(width: 8),
-                  Text(
-                    'Konfirmasi Pengembalian',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+                child: isLoading
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                        ),
+                      )
+                    : const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.check_circle_rounded,
+                            color: Colors.white,
+                            size: 20,
+                          ),
+                          SizedBox(width: 8),
+                          Text(
+                            'Konfirmasi Pengembalian',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 15,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                      ),
+              );
+            }),
             const SizedBox(height: 12),
             OutlinedButton(
               onPressed: () => Get.back(),

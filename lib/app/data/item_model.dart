@@ -24,14 +24,21 @@ class Item {
   });
 
   factory Item.fromJson(Map<String, dynamic> json) {
+    int parseInt(dynamic value) {
+      if (value is int) return value;
+      if (value is String) return int.tryParse(value) ?? 0;
+      if (value is double) return value.toInt();
+      return 0;
+    }
+
     return Item(
-      id: json['id'] as int,
-      name: json['name'] as String,
-      description: json['description'] as String?,
-      qrCode: json['qr_code'] as String,
-      imageUrl: json['image_url'] as String?,
-      condition: json['condition'] as String,
-      status: json['status'] as String,
+      id: parseInt(json['id']),
+      name: json['name']?.toString() ?? '',
+      description: json['description']?.toString(),
+      qrCode: json['qr_code']?.toString() ?? '',
+      imageUrl: json['image_url']?.toString(),
+      condition: json['condition']?.toString() ?? 'good',
+      status: json['status']?.toString() ?? 'available',
       category: json['category'] != null
           ? Category.fromJson(Map<String, dynamic>.from(json['category'] as Map))
           : null,
@@ -53,8 +60,8 @@ class Category {
 
   factory Category.fromJson(Map<String, dynamic> json) {
     return Category(
-      id: json['id'] as int,
-      name: json['name'] as String,
+      id: (json['id'] is int) ? json['id'] : int.tryParse(json['id']?.toString() ?? '') ?? 0,
+      name: json['name']?.toString() ?? '',
     );
   }
 }
@@ -83,9 +90,9 @@ class Warehouse {
     }
 
     return Warehouse(
-      id: json['id'] as int,
-      name: json['name'] as String,
-      address: json['address'] as String,
+      id: (json['id'] is int) ? json['id'] : int.tryParse(json['id']?.toString() ?? '') ?? 0,
+      name: json['name']?.toString() ?? '',
+      address: json['address']?.toString() ?? '',
       latitude: parseDouble(json['latitude']),
       longitude: parseDouble(json['longitude']),
     );
@@ -107,10 +114,10 @@ class ActiveLoan {
 
   factory ActiveLoan.fromJson(Map<String, dynamic> json) {
     return ActiveLoan(
-      id: json['id'] as int,
-      borrower: json['borrower'] as String,
-      loanDate: json['loan_date'] as String,
-      dueDate: json['due_date'] as String,
+      id: (json['id'] is int) ? json['id'] : int.tryParse(json['id']?.toString() ?? '') ?? 0,
+      borrower: json['borrower']?.toString() ?? '',
+      loanDate: json['loan_date']?.toString() ?? '',
+      dueDate: json['due_date']?.toString() ?? '',
     );
   }
 }

@@ -157,7 +157,7 @@ class ItemDetailView extends GetView<ItemDetailController> {
                   const SizedBox(height: 24),
                   ElevatedButton(
                     onPressed: item.status == 'available'
-                        ? () => Get.toNamed(Routes.LOAN_FORM)
+                        ? () => Get.toNamed(Routes.LOAN_FORM, arguments: item)
                         : null,
                     child: const Text('Ajukan Peminjaman'),
                   ),

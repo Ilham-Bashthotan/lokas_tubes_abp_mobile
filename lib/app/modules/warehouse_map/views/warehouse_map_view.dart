@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:get/get.dart';
 
+import '../../../data/warehouse_model.dart';
 import '../../../theme/app_theme.dart';
-import '../../../widgets/app_bottom_nav.dart';
 import '../controllers/warehouse_map_controller.dart';
 
 class WarehouseMapView extends GetView<WarehouseMapController> {
@@ -15,35 +15,28 @@ class WarehouseMapView extends GetView<WarehouseMapController> {
       backgroundColor: AppColors.background,
       body: CustomScrollView(
         slivers: [
-          // ── App Bar ─────────────────────────────────────────
+          // App Bar
           SliverAppBar(
             pinned: true,
             backgroundColor: AppColors.surface,
             expandedHeight: 60,
             elevation: 0,
-            automaticallyImplyLeading: false,
-            title: const Text(
-              'LOKAS',
-              style: TextStyle(
-                fontWeight: FontWeight.w800,
-                fontSize: 22,
-                letterSpacing: -1,
+            leading: IconButton(
+              icon: const Icon(
+                Icons.arrow_back_ios_new_rounded,
+                size: 20,
+                color: AppColors.primary,
               ),
+              onPressed: () => Get.back(),
             ),
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.notifications_none_rounded),
-                onPressed: () {},
-              ),
-              const SizedBox(width: 8),
-            ],
+            title: const Text('Lokasi Gudang'),
             bottom: PreferredSize(
               preferredSize: const Size.fromHeight(1),
               child: Container(height: 1, color: AppColors.divider),
             ),
           ),
 
-          // ── Content ─────────────────────────────────────────
+          // Content
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.all(16),
@@ -83,7 +76,7 @@ class WarehouseMapView extends GetView<WarehouseMapController> {
                   ),
                   const SizedBox(height: 16),
 
-                  // ── Map Container ───────────────────────────
+                  // Map Container
                   Container(
                     height: 300,
                     decoration: BoxDecoration(
@@ -175,22 +168,26 @@ class WarehouseMapView extends GetView<WarehouseMapController> {
                   ),
                   const SizedBox(height: 16),
 
-                  // ── Stats Row ───────────────────────────────
+                  // Stats Row
                   Obx(() {
                     final user = controller.userPosition.value;
+                    final warehousesCount = controller.warehouses.length;
+                    final nearestWarehouse = warehousesCount > 0
+                        ? controller.warehouses.first
+                        : null;
                     return Row(
                       children: [
                         _StatBox(
                           label: 'Gudang',
-                          value: '${controller.warehouses.length}',
+                          value: '$warehousesCount',
                           icon: Icons.warehouse_rounded,
                           color: AppColors.primary,
                         ),
                         const SizedBox(width: 10),
                         _StatBox(
                           label: 'Terdekat',
-                          value: user != null
-                              ? '${controller.getDistanceString(controller.warehouses.first)} km'
+                          value: user != null && nearestWarehouse != null
+                              ? '${controller.getDistanceString(nearestWarehouse)} km'
                               : '— km',
                           icon: Icons.near_me_rounded,
                           color: AppColors.statusPending,
@@ -209,22 +206,61 @@ class WarehouseMapView extends GetView<WarehouseMapController> {
                   }),
                   const SizedBox(height: 20),
 
-                  // ── Warehouse List Section ──────────────────
+                  // Warehouse List Section
                   const Text('Daftar Gudang', style: AppTextStyles.subtitle),
                   const SizedBox(height: 10),
 
                   // Warehouse cards
-                  ...controller.warehouses.map(
-                    (wh) => Obx(() => _WarehouseCard(
-                          warehouse: wh,
-                          isSelected:
-                              controller.selectedWarehouse.value?.id == wh.id,
-                          distance: controller.getDistanceString(wh),
-                          onTap: () => controller.selectWarehouse(wh),
-                          onNavigate: () =>
-                              controller.navigateToGoogleMaps(wh),
-                        )),
-                  ),
+                  Obx(() {
+                    if (controller.isLoadingWarehouses.value) {
+                      return const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 24),
+                        child: Center(child: CircularProgressIndicator()),
+                      );
+                    }
+
+                    if (controller.warehousesError.value != null) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        child: Text(
+                          controller.warehousesError.value!,
+                          style: const TextStyle(
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      );
+                    }
+
+                    if (controller.warehouses.isEmpty) {
+                      return const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 12),
+                        child: Text(
+                          'Belum ada data gudang.',
+                          style: TextStyle(color: AppColors.textSecondary),
+                        ),
+                      );
+                    }
+
+                    return Column(
+                      children: controller.warehouses
+                          .map(
+                            (wh) => Padding(
+                              padding: const EdgeInsets.only(bottom: 10),
+                              child: _WarehouseCard(
+                                warehouse: wh,
+                                isSelected:
+                                    controller.selectedWarehouse.value?.id ==
+                                    wh.id,
+                                distance: controller.getDistanceString(wh),
+                                onTap: () => controller.selectWarehouse(wh),
+                                onNavigate: () =>
+                                    controller.navigateToGoogleMaps(wh),
+                              ),
+                            ),
+                          )
+                          .toList(),
+                    );
+                  }),
 
                   const SizedBox(height: 16),
                 ],
@@ -233,7 +269,6 @@ class WarehouseMapView extends GetView<WarehouseMapController> {
           ),
         ],
       ),
-      bottomNavigationBar: const AppBottomNav(currentIndex: 3),
     );
   }
 
@@ -243,11 +278,23 @@ class WarehouseMapView extends GetView<WarehouseMapController> {
   Widget _buildMap() {
     return Obx(() {
       final user = controller.userPosition.value;
+      final warehouses = controller.warehouses;
+
+      if (warehouses.isEmpty) {
+        return Container(
+          color: AppColors.background,
+          alignment: Alignment.center,
+          child: const Text(
+            'Data gudang belum tersedia',
+            style: TextStyle(color: AppColors.textSecondary),
+          ),
+        );
+      }
 
       return FlutterMap(
         mapController: controller.mapController,
         options: MapOptions(
-          initialCenter: controller.warehouses.first.position,
+          initialCenter: warehouses.first.position,
           initialZoom: controller.zoomLevel.value,
           backgroundColor: AppColors.background,
         ),
@@ -260,9 +307,8 @@ class WarehouseMapView extends GetView<WarehouseMapController> {
 
           // Warehouse markers
           MarkerLayer(
-            markers: controller.warehouses.map((w) {
-              final isSelected =
-                  controller.selectedWarehouse.value?.id == w.id;
+            markers: warehouses.map((w) {
+              final isSelected = controller.selectedWarehouse.value?.id == w.id;
               return Marker(
                 point: w.position,
                 width: isSelected ? 90 : 70,
@@ -270,7 +316,7 @@ class WarehouseMapView extends GetView<WarehouseMapController> {
                 child: GestureDetector(
                   onTap: () => controller.selectWarehouse(w),
                   child: _WarehouseMarker(
-                    code: w.code,
+                    label: w.markerLabel,
                     isSelected: isSelected,
                   ),
                 ),
@@ -374,9 +420,7 @@ class _MapBtn extends StatelessWidget {
           color: isPrimary ? AppColors.primary : AppColors.surface,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: isPrimary
-                ? AppColors.primary
-                : AppColors.border,
+            color: isPrimary ? AppColors.primary : AppColors.border,
           ),
           boxShadow: [
             BoxShadow(
@@ -398,10 +442,10 @@ class _MapBtn extends StatelessWidget {
 
 /// Warehouse marker on map
 class _WarehouseMarker extends StatelessWidget {
-  final String code;
+  final String label;
   final bool isSelected;
 
-  const _WarehouseMarker({required this.code, required this.isSelected});
+  const _WarehouseMarker({required this.label, required this.isSelected});
 
   @override
   Widget build(BuildContext context) {
@@ -438,7 +482,7 @@ class _WarehouseMarker extends StatelessWidget {
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(
-              code,
+              label,
               style: const TextStyle(
                 fontSize: 7,
                 fontWeight: FontWeight.w700,
@@ -538,7 +582,7 @@ class _UserDotState extends State<_UserDot>
 
 /// Warehouse card in the list
 class _WarehouseCard extends StatelessWidget {
-  final Warehouse warehouse;
+  final WarehouseLocation warehouse;
   final bool isSelected;
   final String distance;
   final VoidCallback onTap;
@@ -608,17 +652,16 @@ class _WarehouseCard extends StatelessWidget {
                     children: [
                       Text(warehouse.name, style: AppTextStyles.subtitle),
                       const SizedBox(height: 2),
-                      Text(
-                        warehouse.address,
-                        style: AppTextStyles.caption,
-                      ),
+                      Text(warehouse.address, style: AppTextStyles.caption),
                     ],
                   ),
                 ),
                 // Distance badge
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: AppColors.primary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),

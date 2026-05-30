@@ -14,6 +14,7 @@ abstract class Routes {
   static const WAREHOUSE_MAP = _Paths.WAREHOUSE_MAP;
   static const CAMERA = _Paths.CAMERA;
   static const PROFILE = _Paths.PROFILE;
+  static const NOTIFICATIONS = _Paths.NOTIFICATIONS;
 }
 
 abstract class _Paths {
@@ -29,4 +30,5 @@ abstract class _Paths {
   static const WAREHOUSE_MAP = '/warehouse-map';
   static const CAMERA = '/camera';
   static const PROFILE = '/profile';
+  static const NOTIFICATIONS = '/notifications';
 }

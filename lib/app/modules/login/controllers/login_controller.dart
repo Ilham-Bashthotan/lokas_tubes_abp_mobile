@@ -1,6 +1,7 @@
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
-import 'package:flutter/material.dart';
 import '../../../data/auth_service.dart';
+import '../../../data/fcm_service.dart';
 
 class LoginController extends GetxController {
   final isLoading = false.obs;
@@ -13,6 +14,35 @@ class LoginController extends GetxController {
   @override
   void onReady() {
     super.onReady();
+    _checkSession();
+  }
+
+  Future<void> _checkSession() async {
+    try {
+      final token = await AuthService.getToken();
+      if (token != null && token.isNotEmpty) {
+        isLoading.value = true;
+        final profile = await AuthService.getProfile(forceRefresh: true);
+        isLoading.value = false;
+        
+        if (profile != null) {
+          final role = (profile['role'] ?? '').toString().toLowerCase();
+          if (role == 'staff') {
+            // Ambil token perangkat dan daftarkan ke backend
+            if (Get.isRegistered<FcmService>()) {
+              FcmService.to.fetchAndRegisterToken();
+            }
+            Get.offAllNamed('/home');
+            return;
+          }
+        }
+        // Jika token tidak valid atau bukan staff, logout & bersihkan
+        await AuthService.logout();
+      }
+    } catch (e) {
+      isLoading.value = false;
+      debugPrint('[LOGIN] Gagal memproses session otomatis: $e');
+    }
   }
 
   @override
@@ -32,6 +62,23 @@ class LoginController extends GetxController {
       isLoading.value = false;
 
       if (ok) {
+        final profile = await AuthService.getProfile(forceRefresh: true);
+        final role = (profile?['role'] ?? '').toString().toLowerCase();
+
+        if (role != 'staff') {
+          await AuthService.logout();
+          Get.snackbar(
+            'Akses Ditolak',
+            'Hanya pengguna dengan role staff yang dapat masuk',
+          );
+          return;
+        }
+
+        // Ambil token perangkat dan daftarkan ke backend
+        if (Get.isRegistered<FcmService>()) {
+          await FcmService.to.fetchAndRegisterToken();
+        }
+
         Get.offAllNamed('/home');
       } else {
         Get.snackbar('Login Gagal', 'Periksa kredensial atau koneksi');

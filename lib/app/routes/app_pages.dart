@@ -21,6 +21,8 @@ import '../modules/scan_qr/views/camera_photo_view.dart';
 import '../modules/scan_qr/views/scan_qr_view.dart';
 import '../modules/warehouse_map/bindings/warehouse_map_binding.dart';
 import '../modules/warehouse_map/views/warehouse_map_view.dart';
+import '../modules/notifications/bindings/notifications_binding.dart';
+import '../modules/notifications/views/notifications_view.dart';
 
 part 'app_routes.dart';
 
@@ -91,6 +93,11 @@ class AppPages {
       name: _Paths.PROFILE,
       page: () => const ProfileView(),
       binding: ProfileBinding(),
+    ),
+    GetPage(
+      name: _Paths.NOTIFICATIONS,
+      page: () => const NotificationsView(),
+      binding: NotificationsBinding(),
     ),
   ];
 }
