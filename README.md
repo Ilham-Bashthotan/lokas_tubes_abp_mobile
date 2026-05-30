@@ -134,10 +134,10 @@ cd public
 5. Jalankan server Laravel dengan host IP lokal tersebut (contoh):
 
 ```bash
-php -S [IP_ADDRESS]
+php -S [IP_ADDRESS]:8000
 ```
 
-> Gunakan IP milik perangkat kamu sendiri dari hasil `ipconfig`, jangan selalu pakai IP contoh di atas.
+> Gunakan IP milik perangkat kamu sendiri dari hasil `ipconfig`, jangan selalu pakai IP contoh di atas. Contoh `php -S 192.XXX.XXX.XXX:8000`
 
 ### 3. Buat File `.env` di Project Mobile
 
