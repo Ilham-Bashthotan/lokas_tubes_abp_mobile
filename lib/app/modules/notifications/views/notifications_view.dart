@@ -9,10 +9,13 @@ class NotificationsView extends GetView<NotificationsController> {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: cs.background,
       appBar: AppBar(
-        backgroundColor: AppColors.surface,
+        backgroundColor: cs.surface,
+        foregroundColor: cs.onSurface,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18),
@@ -33,7 +36,7 @@ class NotificationsView extends GetView<NotificationsController> {
               child: Text(
                 'Tandai Dibaca',
                 style: TextStyle(
-                  color: hasUnread ? AppColors.primary : AppColors.textHint,
+                  color: hasUnread ? cs.primary : cs.onSurface.withOpacity(0.6),
                   fontWeight: FontWeight.w700,
                   fontSize: 13,
                 ),
@@ -44,7 +47,7 @@ class NotificationsView extends GetView<NotificationsController> {
         ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
-          child: Container(height: 1, color: AppColors.divider),
+          child: Container(height: 1, color: cs.onSurface.withOpacity(0.08)),
         ),
       ),
       body: Obx(() {
@@ -64,30 +67,30 @@ class NotificationsView extends GetView<NotificationsController> {
                   Container(
                     padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(
-                      color: AppColors.surface,
+                      color: cs.surface,
                       shape: BoxShape.circle,
-                      border: Border.all(color: AppColors.divider, width: 1.5),
+                      border: Border.all(color: cs.onSurface.withOpacity(0.08), width: 1.5),
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.notifications_off_rounded,
                       size: 48,
-                      color: AppColors.textHint,
+                      color: cs.onSurface.withOpacity(0.6),
                     ),
                   ),
                   const SizedBox(height: 24),
                   Text(
                     'Belum Ada Notifikasi',
-                    style: AppTextStyles.subtitle.copyWith(
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.textPrimary,
-                    ),
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w800,
+                          color: cs.onSurface,
+                        ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     'Riwayat pemberitahuan status peminjaman barang Anda akan muncul di sini secara teratur.',
-                    style: AppTextStyles.body.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: cs.onSurface.withOpacity(0.7),
+                        ),
                     textAlign: TextAlign.center,
                   ),
                 ],
@@ -165,24 +168,26 @@ class _NotificationCard extends StatelessWidget {
     final String formattedDate =
         '${notif.alertedAt.day}/${notif.alertedAt.month}/${notif.alertedAt.year} · ${notif.alertedAt.hour.toString().padLeft(2, '0')}:${notif.alertedAt.minute.toString().padLeft(2, '0')}';
 
+    final cs = Theme.of(context).colorScheme;
+
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(12),
       child: Container(
         decoration: BoxDecoration(
-          color: notif.isRead ? AppColors.surface : AppColors.surface.withValues(alpha: 0.8),
+          color: notif.isRead ? cs.surface : cs.surface.withOpacity(0.8),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: notif.isRead 
-                ? AppColors.divider 
-                : severityColor.withValues(alpha: 0.4),
+                ? cs.onSurface.withOpacity(0.08) 
+                : severityColor.withOpacity(0.4),
             width: notif.isRead ? 1.0 : 1.5,
           ),
           boxShadow: notif.isRead 
               ? [] 
               : [
                   BoxShadow(
-                    color: severityColor.withValues(alpha: 0.05),
+                    color: severityColor.withOpacity(0.05),
                     blurRadius: 6,
                     offset: const Offset(0, 2),
                   )
@@ -235,9 +240,9 @@ class _NotificationCard extends StatelessWidget {
                       ),
                       Text(
                         formattedDate,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 10,
-                          color: AppColors.textSecondary,
+                          color: cs.onSurface.withOpacity(0.7),
                         ),
                       ),
                     ],
@@ -249,7 +254,7 @@ class _NotificationCard extends StatelessWidget {
                       fontSize: 13,
                       height: 1.4,
                       fontWeight: notif.isRead ? FontWeight.w500 : FontWeight.w700,
-                      color: notif.isRead ? AppColors.textSecondary : AppColors.textPrimary,
+                      color: notif.isRead ? cs.onSurface.withOpacity(0.7) : cs.onSurface,
                     ),
                   ),
                   if (notif.loan?.item != null) ...[
@@ -257,15 +262,15 @@ class _NotificationCard extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                        color: AppColors.background,
+                        color: cs.surface,
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(
                         'Barang: ${notif.loan!.item!.name}',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
-                          color: AppColors.textSecondary,
+                          color: cs.onSurface.withOpacity(0.7),
                         ),
                       ),
                     ),

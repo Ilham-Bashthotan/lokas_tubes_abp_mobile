@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../theme/app_theme.dart';
 import '../../../widgets/app_bottom_nav.dart';
+import '../../../controllers/theme_controller.dart';
 import '../controllers/profile_controller.dart';
 
 class ProfileView extends GetView<ProfileController> {
@@ -10,13 +11,13 @@ class ProfileView extends GetView<ProfileController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).colorScheme.background,
       body: CustomScrollView(
         slivers: [
           // App Bar
           SliverAppBar(
             pinned: true,
-            backgroundColor: AppColors.surface,
+            backgroundColor: Theme.of(context).colorScheme.surface,
             expandedHeight: 60,
             elevation: 0,
             automaticallyImplyLeading: false,
@@ -26,7 +27,7 @@ class ProfileView extends GetView<ProfileController> {
             ),
             bottom: PreferredSize(
               preferredSize: const Size.fromHeight(1),
-              child: Container(height: 1, color: AppColors.divider),
+              child: Container(height: 1, color: Theme.of(context).colorScheme.onSurface.withOpacity(0.06)),
             ),
           ),
           // Body
@@ -89,6 +90,9 @@ class ProfileView extends GetView<ProfileController> {
                           onTap: () =>
                               controller.fetchProfile(forceRefresh: true),
                         ),
+                        const SizedBox(height: 8),
+                        // Theme toggle
+                        _ThemeToggleTile(controller: controller),
                         const SizedBox(height: 8),
                         // Logout Button
                         Obx(
@@ -270,6 +274,8 @@ class _InfoSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -277,25 +283,36 @@ class _InfoSection extends StatelessWidget {
           padding: const EdgeInsets.only(left: 2, bottom: 8),
           child: Text(
             title.toUpperCase(),
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w700,
-              color: AppColors.textHint,
+              color: cs.onSurface.withOpacity(0.6),
               letterSpacing: 1.0,
             ),
           ),
         ),
         Container(
-          decoration: AppDecoration.card,
+          decoration: BoxDecoration(
+            color: cs.surface,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: cs.onSurface.withOpacity(0.06), width: 1),
+            boxShadow: [
+              BoxShadow(
+                color: cs.primary.withOpacity(0.06),
+                blurRadius: 8,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
           child: Column(
             children: [
               for (int i = 0; i < items.length; i++) ...[
                 items[i],
                 if (i < items.length - 1)
-                  const Divider(
+                  Divider(
                     height: 1,
                     thickness: 1,
-                    color: AppColors.divider,
+                    color: cs.onSurface.withOpacity(0.06),
                     indent: 56,
                   ),
               ],
@@ -326,15 +343,18 @@ class _InfoItem extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       child: Row(
         children: [
-          Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              color: AppColors.primarySurface,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Icon(icon, size: 18, color: AppColors.primary),
-          ),
+          Builder(builder: (ctx) {
+            final cs = Theme.of(ctx).colorScheme;
+            return Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: cs.primary.withOpacity(0.12),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(icon, size: 18, color: cs.primary),
+            );
+          }),
           const SizedBox(width: 14),
           Expanded(
             child: Column(
@@ -342,9 +362,9 @@ class _InfoItem extends StatelessWidget {
               children: [
                 Text(
                   label,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 11,
-                    color: AppColors.textHint,
+                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -352,9 +372,9 @@ class _InfoItem extends StatelessWidget {
                 valueWidget ??
                     Text(
                       value,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 14,
-                        color: AppColors.textPrimary,
+                        color: Theme.of(context).colorScheme.onSurface,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -391,9 +411,9 @@ class _ActionTile extends StatelessWidget {
         borderRadius: BorderRadius.circular(8),
         child: Container(
           decoration: BoxDecoration(
-            color: AppColors.surface,
+            color: Theme.of(context).colorScheme.surface,
             borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: color.withValues(alpha: 0.25)),
+            border: Border.all(color: color.withOpacity(0.25)),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           child: Row(
@@ -402,7 +422,7 @@ class _ActionTile extends StatelessWidget {
                 width: 36,
                 height: 36,
                 decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.10),
+                  color: color.withOpacity(0.10),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(icon, size: 18, color: color),
@@ -421,12 +441,94 @@ class _ActionTile extends StatelessWidget {
               Icon(
                 Icons.chevron_right_rounded,
                 size: 20,
-                color: color.withValues(alpha: 0.5),
+                color: color.withOpacity(0.5),
               ),
             ],
           ),
         ),
       ),
     );
+  }
+}
+
+// Theme Toggle Tile
+class _ThemeToggleTile extends StatelessWidget {
+  final ProfileController controller;
+  
+  const _ThemeToggleTile({required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    final themeController = Get.find<ThemeController>();
+    
+    return Obx(() {
+      final isDarkMode = themeController.isDarkMode.value;
+      final themeName = themeController.getThemeDisplayName();
+      final cs = Theme.of(context).colorScheme;
+      
+      return Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: controller.toggleTheme,
+          borderRadius: BorderRadius.circular(8),
+          child: Container(
+            decoration: BoxDecoration(
+              color: cs.surface,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: cs.primary.withOpacity(0.18),
+              ),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            child: Row(
+              children: [
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: cs.primary.withOpacity(0.10),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(
+                    isDarkMode ? Icons.brightness_4_rounded : Icons.brightness_7_rounded,
+                    size: 18,
+                    color: cs.primary,
+                  ),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Tampilan',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: cs.onSurface,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        themeName,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: cs.onSurface.withOpacity(0.6),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Switch(
+                  value: isDarkMode,
+                  onChanged: (_) => controller.toggleTheme(),
+                  activeThumbColor: cs.primary,
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    });
   }
 }

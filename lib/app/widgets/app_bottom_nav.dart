@@ -32,15 +32,17 @@ class AppBottomNav extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.surface,
-        border: const Border(
-          top: BorderSide(color: AppColors.border, width: 1),
+        color: cs.surface,
+        border: Border(
+          top: BorderSide(color: cs.onSurface.withOpacity(0.06), width: 1),
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
+            color: cs.onSurface.withOpacity(0.06),
             blurRadius: 20,
             offset: const Offset(0, -4),
           ),
@@ -75,16 +77,15 @@ class AppBottomNav extends StatelessWidget {
                     horizontal: 24,
                   ), // Memberikan lebar (persegi panjang)
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [AppColors.primaryLight, AppColors.primaryDark],
+                    gradient: LinearGradient(
+                      colors: [cs.primary, cs.primary.withOpacity(0.85)],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
-                    // Anda bisa mengubah 16 menjadi 26 jika ingin bentuknya oval/pill-shape
                     borderRadius: BorderRadius.circular(16),
                     boxShadow: [
                       BoxShadow(
-                        color: AppColors.primaryDark.withValues(alpha: 0.4),
+                        color: cs.primary.withOpacity(0.36),
                         blurRadius: 8,
                         offset: const Offset(0, 4),
                       ),
@@ -147,18 +148,19 @@ class _NavItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(12),
-      child: AnimatedContainer(
+        child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: active
             ? BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.1),
+                color: cs.primary.withOpacity(0.10),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: AppColors.primary.withValues(alpha: 0.5),
+                  color: cs.primary.withOpacity(0.5),
                   width: 1,
                 ),
               )
@@ -169,7 +171,7 @@ class _NavItem extends StatelessWidget {
             Icon(
               icon,
               size: 24,
-              color: active ? AppColors.primary : AppColors.textHint,
+              color: active ? cs.primary : cs.onSurface.withOpacity(0.5),
             ),
             const SizedBox(height: 4),
             Text(
@@ -177,7 +179,7 @@ class _NavItem extends StatelessWidget {
               style: TextStyle(
                 fontSize: 10,
                 fontWeight: active ? FontWeight.bold : FontWeight.w500,
-                color: active ? AppColors.primary : AppColors.textHint,
+                color: active ? cs.primary : cs.onSurface.withOpacity(0.5),
               ),
             ),
           ],

@@ -7,19 +7,57 @@ import '../../../routes/app_pages.dart';
 import '../../../widgets/app_bottom_nav.dart';
 import '../controllers/home_controller.dart';
 
+bool _isDarkMode(BuildContext context) {
+  return Theme.of(context).brightness == Brightness.dark;
+}
+
+Color _statusPendingColor(BuildContext context) {
+  return _isDarkMode(context)
+      ? AppColorsDark.statusPending
+      : AppColors.statusPending;
+}
+
+Color _statusReturnedColor(BuildContext context) {
+  return _isDarkMode(context)
+      ? AppColorsDark.statusReturned
+      : AppColors.statusReturned;
+}
+
+Color _statusOverdueColor(BuildContext context) {
+  return _isDarkMode(context)
+      ? AppColorsDark.statusOverdue
+      : AppColors.statusOverdue;
+}
+
+Color _statusAvailableColor(BuildContext context) {
+  return _isDarkMode(context)
+      ? AppColorsDark.statusAvailable
+      : AppColors.statusAvailable;
+}
+
+Color _statusBadgeBackground(Color color) {
+  return color.withValues(alpha: 0.12);
+}
+
+Color _statusBadgeBorder(Color color) {
+  return color.withValues(alpha: 0.3);
+}
+
 class HomeView extends GetView<HomeController> {
   const HomeView({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: cs.surface,
       body: CustomScrollView(
         slivers: [
           // ── App Bar ───────────────────────────────────────
           SliverAppBar(
             pinned: true,
-            backgroundColor: AppColors.surface,
+            backgroundColor: cs.surface,
             expandedHeight: 60,
             elevation: 0,
             automaticallyImplyLeading: false,
@@ -53,8 +91,8 @@ class HomeView extends GetView<HomeController> {
                             horizontal: 4,
                             vertical: 2,
                           ),
-                          decoration: const BoxDecoration(
-                            color: AppColors.statusOverdue,
+                          decoration: BoxDecoration(
+                            color: _statusOverdueColor(context),
                             shape: BoxShape.circle,
                           ),
                           constraints: const BoxConstraints(
@@ -81,7 +119,7 @@ class HomeView extends GetView<HomeController> {
             ],
             bottom: PreferredSize(
               preferredSize: const Size.fromHeight(1),
-              child: Container(height: 1, color: AppColors.divider),
+              child: Container(height: 1, color: cs.onSurface.withValues(alpha: 0.06)),
             ),
           ),
 
@@ -95,25 +133,25 @@ class HomeView extends GetView<HomeController> {
                   Obx(
                     () => Row(
                       children: [
-                        _StatCard(
-                          label: 'Pinjaman Aktif',
-                          value: controller.activeLoansCount.value.toString(),
-                          icon: Icons.inventory_2_rounded,
-                          color: AppColors.primary,
-                        ),
+                              _StatCard(
+                                label: 'Pinjaman Aktif',
+                                value: controller.activeLoansCount.value.toString(),
+                                icon: Icons.inventory_2_rounded,
+                                color: cs.primary,
+                              ),
                         const SizedBox(width: 10),
                         _StatCard(
                           label: 'Menunggu',
                           value: controller.pendingLoansCount.value.toString(),
                           icon: Icons.hourglass_top_rounded,
-                          color: AppColors.statusPending,
+                          color: _statusPendingColor(context),
                         ),
                         const SizedBox(width: 10),
                         _StatCard(
                           label: 'Riwayat',
                           value: controller.totalLoansCount.value.toString(),
                           icon: Icons.history_rounded,
-                          color: AppColors.statusReturned,
+                          color: _statusReturnedColor(context),
                         ),
                       ],
                     ),
@@ -122,7 +160,21 @@ class HomeView extends GetView<HomeController> {
 
                   // ── Quick Actions ─────────────────────────────
                   Container(
-                    decoration: AppDecoration.primaryCard,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [cs.primary, cs.primary.withValues(alpha: 0.85)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(8),
+                      boxShadow: [
+                        BoxShadow(
+                          color: cs.primary.withValues(alpha: 0.12),
+                          blurRadius: 12,
+                          offset: const Offset(0, 6),
+                        ),
+                      ],
+                    ),
                     padding: const EdgeInsets.all(18),
                     child: Row(
                       children: [
@@ -217,11 +269,11 @@ class HomeView extends GetView<HomeController> {
                   ),
                   Obx(() {
                     if (controller.myLoans.isEmpty) {
-                      return const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 10),
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 10),
                         child: Text(
                           'Belum ada pinjaman.',
-                          style: TextStyle(color: AppColors.textSecondary),
+                          style: TextStyle(color: cs.onSurface.withValues(alpha: 0.6)),
                         ),
                       );
                     }
@@ -256,9 +308,9 @@ class HomeView extends GetView<HomeController> {
                       return Container(
                         width: double.infinity,
                         padding: const EdgeInsets.symmetric(vertical: 20),
-                        child: const Text(
+                        child: Text(
                           'Tidak ada barang tersedia saat ini.',
-                          style: TextStyle(color: AppColors.textSecondary),
+                          style: TextStyle(color: cs.onSurface.withValues(alpha: 0.6)),
                           textAlign: TextAlign.center,
                         ),
                       );
@@ -302,6 +354,8 @@ class _StatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
     return Expanded(
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 10),
@@ -326,9 +380,9 @@ class _StatCard extends StatelessWidget {
             Text(
               label,
               textAlign: TextAlign.center,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 10,
-                color: AppColors.textSecondary,
+                color: cs.onSurface.withValues(alpha: 0.6),
               ),
             ),
           ],
@@ -347,18 +401,27 @@ class _SectionHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Expanded(child: Text(title, style: AppTextStyles.subtitle)),
+        Expanded(
+          child: Text(
+            title,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
+          ),
+        ),
         TextButton(
           onPressed: onMore,
           style: TextButton.styleFrom(
             padding: EdgeInsets.zero,
             minimumSize: Size.zero,
           ),
-          child: const Text(
+          child: Text(
             'Lihat semua',
             style: TextStyle(
               fontSize: 12,
-              color: AppColors.primary,
+              color: Theme.of(context).colorScheme.primary,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -374,6 +437,7 @@ class _LoanCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     final isPending = loan.status == 'pending';
 
     // Konfigurasi warna, teks status, dan lencana berdasarkan status pinjaman
@@ -382,14 +446,14 @@ class _LoanCard extends StatelessWidget {
     Widget statusBadge;
 
     if (isPending) {
-      color = AppColors.statusPending;
+      color = _statusPendingColor(context);
       subtitle = 'Menunggu persetujuan';
       statusBadge = Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.12),
+          color: _statusBadgeBackground(color),
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: color.withValues(alpha: 0.3)),
+          border: Border.all(color: _statusBadgeBorder(color)),
         ),
         child: Text(
           'Menunggu',
@@ -403,15 +467,15 @@ class _LoanCard extends StatelessWidget {
     } else {
       final daysLeft = loan.dueDate.difference(DateTime.now()).inDays;
       final isUrgent = daysLeft <= 3;
-      color = isUrgent ? AppColors.statusOverdue : AppColors.statusActive;
+      color = isUrgent ? _statusOverdueColor(context) : cs.primary;
       subtitle =
           'Due: ${loan.dueDate.day}/${loan.dueDate.month}/${loan.dueDate.year}';
       statusBadge = Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.12),
+          color: _statusBadgeBackground(color),
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: color.withValues(alpha: 0.3)),
+          border: Border.all(color: _statusBadgeBorder(color)),
         ),
         child: Text(
           '${daysLeft < 0 ? 0 : daysLeft} hr',
@@ -425,7 +489,18 @@ class _LoanCard extends StatelessWidget {
     }
 
     return Container(
-      decoration: AppDecoration.card,
+      decoration: BoxDecoration(
+        color: cs.surface,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: cs.onSurface.withValues(alpha: 0.06)),
+        boxShadow: [
+          BoxShadow(
+            color: cs.primary.withValues(alpha: 0.03),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
       padding: const EdgeInsets.all(14),
       child: Row(
         children: [
@@ -434,15 +509,15 @@ class _LoanCard extends StatelessWidget {
             height: 44,
             decoration: BoxDecoration(
               color: isPending
-                  ? AppColors.statusPending.withValues(alpha: 0.1)
-                  : AppColors.primarySurface,
+                  ? _statusBadgeBackground(_statusPendingColor(context))
+                  : cs.primaryContainer,
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(
               isPending
                   ? Icons.hourglass_empty_rounded
                   : Icons.inventory_rounded,
-              color: isPending ? AppColors.statusPending : AppColors.primary,
+              color: isPending ? _statusPendingColor(context) : cs.primary,
               size: 22,
             ),
           ),
@@ -451,9 +526,15 @@ class _LoanCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(loan.item.name, style: AppTextStyles.subtitle),
+                Text(
+                  loan.item.name,
+                  style: AppTextStyles.subtitle.copyWith(color: cs.onSurface),
+                ),
                 const SizedBox(height: 2),
-                Text(subtitle, style: AppTextStyles.caption),
+                Text(
+                  subtitle,
+                  style: AppTextStyles.caption.copyWith(color: cs.onSurface.withValues(alpha: 0.72)),
+                ),
               ],
             ),
           ),
@@ -470,10 +551,23 @@ class _AvailableItemCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
     return GestureDetector(
       onTap: () => Get.toNamed(Routes.ITEM_DETAIL, arguments: item.id),
       child: Container(
-        decoration: AppDecoration.card,
+        decoration: BoxDecoration(
+          color: cs.surface,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: cs.onSurface.withValues(alpha: 0.06)),
+          boxShadow: [
+            BoxShadow(
+              color: cs.primary.withValues(alpha: 0.03),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
         padding: const EdgeInsets.all(14),
         child: Row(
           children: [
@@ -481,14 +575,14 @@ class _AvailableItemCard extends StatelessWidget {
               width: 44,
               height: 44,
               decoration: BoxDecoration(
-                color: AppColors.statusAvailable.withValues(alpha: 0.10),
+                color: _statusBadgeBackground(_statusAvailableColor(context)),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Icon(
                 item.status == 'available'
                     ? Icons.inventory_2_rounded
                     : Icons.device_unknown_rounded,
-                color: AppColors.statusAvailable,
+                color: _statusAvailableColor(context),
                 size: 22,
               ),
             ),
@@ -497,11 +591,14 @@ class _AvailableItemCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(item.name, style: AppTextStyles.subtitle),
+                  Text(
+                    item.name,
+                    style: AppTextStyles.subtitle.copyWith(color: cs.onSurface),
+                  ),
                   const SizedBox(height: 2),
                   Text(
                     '${item.warehouse?.name ?? 'Gudang'} · ${item.status.capitalizeFirst}',
-                    style: AppTextStyles.caption,
+                    style: AppTextStyles.caption.copyWith(color: cs.onSurface.withValues(alpha: 0.72)),
                   ),
                 ],
               ),
@@ -509,18 +606,18 @@ class _AvailableItemCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: AppColors.statusAvailable.withValues(alpha: 0.12),
+                color: _statusBadgeBackground(_statusAvailableColor(context)),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
-                  color: AppColors.statusAvailable.withValues(alpha: 0.3),
+                  color: _statusBadgeBorder(_statusAvailableColor(context)),
                 ),
               ),
               child: Text(
                 item.status.capitalizeFirst ?? item.status,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.statusAvailable,
+                  color: _statusAvailableColor(context),
                 ),
               ),
             ),

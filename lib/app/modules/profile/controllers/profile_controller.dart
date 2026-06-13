@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import '../../../data/auth_service.dart';
 import '../../../data/fcm_service.dart';
 import '../../../routes/app_pages.dart';
+import '../../../controllers/theme_controller.dart';
 
 class ProfileController extends GetxController {
   final count = 0.obs;
@@ -111,5 +112,11 @@ class ProfileController extends GetxController {
       return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
     }
     return parts[0][0].toUpperCase();
+  }
+
+  // Theme toggle
+  void toggleTheme() {
+    final themeController = Get.find<ThemeController>();
+    themeController.toggleDarkMode();
   }
 }
