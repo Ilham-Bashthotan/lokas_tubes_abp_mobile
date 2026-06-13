@@ -8,12 +8,13 @@ class LoginView extends GetView<LoginController> {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     final emailCtrl = TextEditingController();
     final passCtrl = TextEditingController();
     final obscure = true.obs;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: cs.surface,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -26,10 +27,10 @@ class LoginView extends GetView<LoginController> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text(
+                  Text(
                     'LOK',
                     style: TextStyle(
-                      color: AppColors.textPrimary,
+                      color: cs.onSurface,
                       fontSize: 32,
                       fontWeight: FontWeight.w800,
                       letterSpacing: -1,
@@ -38,7 +39,7 @@ class LoginView extends GetView<LoginController> {
                   Text(
                     'AS',
                     style: TextStyle(
-                      color: AppColors.primaryLight,
+                      color: cs.primary,
                       fontSize: 32,
                       fontWeight: FontWeight.w800,
                       letterSpacing: -1,
@@ -50,7 +51,7 @@ class LoginView extends GetView<LoginController> {
               Text(
                 'ASSET SECURITY INFRASTRUCTURE',
                 style: TextStyle(
-                  color: AppColors.textHint,
+                  color: cs.onSurface.withValues(alpha: 0.6),
                   fontSize: 10,
                   letterSpacing: 1.5,
                   fontWeight: FontWeight.w700,
@@ -59,17 +60,19 @@ class LoginView extends GetView<LoginController> {
               const SizedBox(height: 48),
 
               // Title
-              Text('System Access', style: AppTextStyles.headline),
+              Text('System Access', style: AppTextStyles.headline.copyWith(color: cs.onSurface)),
               const SizedBox(height: 6),
               Text(
                 'Initialize authentication sequence',
-                style: AppTextStyles.body.copyWith(color: AppColors.textHint),
+                style: AppTextStyles.body.copyWith(color: cs.onSurface.withValues(alpha: 0.7)),
               ),
               const SizedBox(height: 40),
 
               // Form Card
               Container(
-                decoration: AppDecoration.card,
+                decoration: AppDecoration.card.copyWith(
+                  color: cs.surfaceContainerHighest,
+                ),
                 padding: const EdgeInsets.all(24),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -78,19 +81,19 @@ class LoginView extends GetView<LoginController> {
                     Text(
                       'Email',
                       style: AppTextStyles.label.copyWith(
-                        color: AppColors.textSecondary,
+                        color: cs.onSurface.withValues(alpha: 0.8),
                       ),
                     ),
                     const SizedBox(height: 6),
                     TextFormField(
                       controller: emailCtrl,
                       keyboardType: TextInputType.emailAddress,
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         hintText: 'staff@inventorytrack.id',
                         prefixIcon: Icon(
                           Icons.email_rounded,
                           size: 18,
-                          color: AppColors.textHint,
+                          color: cs.onSurface.withValues(alpha: 0.5),
                         ),
                       ),
                     ),
@@ -100,7 +103,7 @@ class LoginView extends GetView<LoginController> {
                     Text(
                       'Password',
                       style: AppTextStyles.label.copyWith(
-                        color: AppColors.textSecondary,
+                        color: cs.onSurface.withValues(alpha: 0.8),
                       ),
                     ),
                     const SizedBox(height: 6),
@@ -110,10 +113,10 @@ class LoginView extends GetView<LoginController> {
                         obscureText: obscure.value,
                         decoration: InputDecoration(
                           hintText: '••••••••',
-                          prefixIcon: const Icon(
+                          prefixIcon: Icon(
                             Icons.lock_rounded,
                             size: 18,
-                            color: AppColors.textHint,
+                            color: cs.onSurface.withValues(alpha: 0.5),
                           ),
                           suffixIcon: IconButton(
                             icon: Icon(
@@ -121,7 +124,7 @@ class LoginView extends GetView<LoginController> {
                                   ? Icons.visibility_off_rounded
                                   : Icons.visibility_rounded,
                               size: 18,
-                              color: AppColors.textHint,
+                              color: cs.onSurface.withValues(alpha: 0.5),
                             ),
                             onPressed: () => obscure.toggle(),
                           ),

@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'app/data/fcm_service.dart';
+import 'app/controllers/theme_controller.dart';
 
 import 'app/routes/app_pages.dart';
 import 'app/theme/app_theme.dart';
@@ -35,16 +36,23 @@ class InventoryTrackApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GetMaterialApp(
-      title: 'Inventory Track',
-      debugShowCheckedModeBanner: false,
-      theme: buildAppTheme(),
-      defaultTransition: Transition.noTransition,
-      initialRoute: Routes.LOGIN,
-      getPages: AppPages.routes,
-      initialBinding: BindingsBuilder(() {
-        Get.put(FcmService());
-      }),
+    // Initialize ThemeController
+    final themeController = Get.put(ThemeController());
+
+    return Obx(
+      () => GetMaterialApp(
+        title: 'Inventory Track',
+        debugShowCheckedModeBanner: false,
+        theme: buildAppTheme(brightness: Brightness.light),
+        darkTheme: buildAppTheme(brightness: Brightness.dark),
+        themeMode: themeController.themeMode.value,
+        defaultTransition: Transition.noTransition,
+        initialRoute: Routes.LOGIN,
+        getPages: AppPages.routes,
+        initialBinding: BindingsBuilder(() {
+          Get.put(FcmService());
+        }),
+      ),
     );
   }
 }

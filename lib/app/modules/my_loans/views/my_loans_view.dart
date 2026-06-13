@@ -11,24 +11,26 @@ class MyLoansView extends GetView<MyLoansController> {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     final activeFilter = 0.obs;
     final filters = ['Semua', 'Active', 'Pending', 'Returned'];
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: cs.background,
       appBar: AppBar(
-        backgroundColor: AppColors.surface,
+        backgroundColor: cs.surface,
+        foregroundColor: cs.onSurface,
         automaticallyImplyLeading: false,
         title: const Text('Riwayat Pinjam'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.tune_rounded, color: AppColors.primary),
+            icon: Icon(Icons.tune_rounded, color: cs.primary),
             onPressed: () {},
           ),
         ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
-          child: Container(height: 1, color: AppColors.divider),
+          child: Container(height: 1, color: cs.onSurface.withOpacity(0.08)),
         ),
       ),
       body: Column(
@@ -41,11 +43,11 @@ class MyLoansView extends GetView<MyLoansController> {
             final overdue = controller.overdueCount.value;
 
             return Container(
-              color: AppColors.surface,
+              color: cs.surface,
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
               child: Row(
                 children: [
-                  _StatBox(label: 'Total', value: total.toString(), color: AppColors.primary),
+                  _StatBox(label: 'Total', value: total.toString(), color: cs.primary),
                   const SizedBox(width: 10),
                   _StatBox(
                     label: 'Aktif',
@@ -70,7 +72,7 @@ class MyLoansView extends GetView<MyLoansController> {
           }),
           // Filter chips
           Container(
-            color: AppColors.surface,
+            color: cs.surface,
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
             child: Obx(
               () => SingleChildScrollView(
@@ -95,7 +97,7 @@ class MyLoansView extends GetView<MyLoansController> {
               ),
             ),
           ),
-          Container(height: 1, color: AppColors.divider),
+          Container(height: 1, color: cs.onSurface.withOpacity(0.08)),
           // List
           Expanded(
             child: Obx(() {
@@ -106,10 +108,10 @@ class MyLoansView extends GetView<MyLoansController> {
               }
 
               if (controller.loans.isEmpty) {
-                return const Center(
+                return Center(
                   child: Text(
                     'Tidak ada data peminjaman',
-                    style: TextStyle(color: AppColors.textSecondary),
+                    style: TextStyle(color: cs.onSurface.withOpacity(0.7)),
                   ),
                 );
               }
@@ -198,13 +200,15 @@ class _StatBox extends StatelessWidget {
   });
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
     return Expanded(
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 10),
         decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.08),
+          color: color.withOpacity(0.08),
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: color.withValues(alpha: 0.2)),
+          border: Border.all(color: color.withOpacity(0.2)),
         ),
         child: Column(
           children: [
@@ -219,9 +223,9 @@ class _StatBox extends StatelessWidget {
             const SizedBox(height: 2),
             Text(
               label,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 10,
-                color: AppColors.textSecondary,
+                color: cs.onSurface.withOpacity(0.7),
               ),
             ),
           ],
@@ -240,18 +244,21 @@ class _FilterChip extends StatelessWidget {
     required this.active,
     required this.onTap,
   });
+
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 7),
         decoration: BoxDecoration(
-          color: active ? AppColors.primary : AppColors.background,
+          color: active ? cs.primary : cs.surface,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: active ? AppColors.primary : AppColors.border,
+            color: active ? cs.primary : cs.onSurface.withOpacity(0.12),
           ),
         ),
         child: Text(
@@ -259,7 +266,7 @@ class _FilterChip extends StatelessWidget {
           style: TextStyle(
             fontSize: 12,
             fontWeight: active ? FontWeight.w700 : FontWeight.w500,
-            color: active ? Colors.white : AppColors.textSecondary,
+            color: active ? Colors.white : cs.onSurface.withOpacity(0.75),
           ),
         ),
       ),
@@ -274,10 +281,24 @@ class _LoanCard extends StatelessWidget {
     required this.loan,
     required this.onReturnPressed,
   });
+
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
     return Container(
-      decoration: AppDecoration.card,
+      decoration: BoxDecoration(
+        color: cs.surface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: cs.onSurface.withOpacity(0.08)),
+        boxShadow: [
+          BoxShadow(
+            color: cs.onSurface.withOpacity(0.03),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -288,7 +309,7 @@ class _LoanCard extends StatelessWidget {
                 width: 44,
                 height: 44,
                 decoration: BoxDecoration(
-                  color: loan.statusColor.withValues(alpha: 0.10),
+                  color: loan.statusColor.withOpacity(0.10),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(loan.icon, color: loan.statusColor, size: 22),
@@ -298,9 +319,17 @@ class _LoanCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(loan.name, style: AppTextStyles.subtitle),
+                    Text(loan.name,
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleMedium
+                            ?.copyWith(color: cs.onSurface, fontWeight: FontWeight.w700)),
                     const SizedBox(height: 2),
-                    Text(loan.period, style: AppTextStyles.caption),
+                    Text(loan.period,
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodySmall
+                            ?.copyWith(color: cs.onSurface.withOpacity(0.75))),
                   ],
                 ),
               ),
@@ -310,10 +339,10 @@ class _LoanCard extends StatelessWidget {
                   vertical: 4,
                 ),
                 decoration: BoxDecoration(
-                  color: loan.statusColor.withValues(alpha: 0.12),
+                  color: loan.statusColor.withOpacity(0.12),
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
-                    color: loan.statusColor.withValues(alpha: 0.3),
+                    color: loan.statusColor.withOpacity(0.3),
                   ),
                 ),
                 child: Text(
@@ -329,7 +358,7 @@ class _LoanCard extends StatelessWidget {
           ),
           if (loan.canReturn) ...[
             const SizedBox(height: 12),
-            Container(height: 1, color: AppColors.divider),
+            Container(height: 1, color: cs.onSurface.withOpacity(0.08)),
             const SizedBox(height: 10),
             SizedBox(
               width: double.infinity,
@@ -343,6 +372,8 @@ class _LoanCard extends StatelessWidget {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
+                  side: BorderSide(color: cs.primary),
+                  foregroundColor: cs.primary,
                 ),
               ),
             ),

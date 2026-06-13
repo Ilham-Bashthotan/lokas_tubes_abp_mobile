@@ -8,7 +8,7 @@ import '../controllers/item_detail_controller.dart';
 class ItemDetailView extends GetView<ItemDetailController> {
   const ItemDetailView({super.key});
 
-  Color _statusColor(String status) {
+  Color _statusColor(String status, ColorScheme cs) {
     switch (status) {
       case 'available':
         return AppColors.statusAvailable;
@@ -17,30 +17,33 @@ class ItemDetailView extends GetView<ItemDetailController> {
       case 'maintenance':
         return AppColors.statusOverdue;
       default:
-        return AppColors.textHint;
+        return cs.onSurface.withOpacity(0.65);
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: AppColors.surface,
+        backgroundColor: cs.surface,
+        foregroundColor: cs.onSurface,
         leading: IconButton(
-          icon: const Icon(
+          icon: Icon(
             Icons.arrow_back_ios_new_rounded,
             size: 20,
-            color: AppColors.primary,
+            color: cs.primary,
           ),
           onPressed: () => Get.back(),
         ),
         title: const Text('Detail Barang'),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
-          child: Container(height: 1, color: AppColors.divider),
+          child: Container(height: 1, color: cs.onSurface.withOpacity(0.08)),
         ),
       ),
-      backgroundColor: AppColors.background,
+      backgroundColor: cs.background,
       body: SafeArea(
         child: Obx(
           () {
@@ -75,10 +78,10 @@ class ItemDetailView extends GetView<ItemDetailController> {
 
             final item = controller.item.value;
             if (item == null) {
-              return const Center(child: Text('Barang tidak ditemukan'));
+              return Center(child: Text('Barang tidak ditemukan', style: TextStyle(color: cs.onSurface)));
             }
 
-            final statusColor = _statusColor(item.status);
+            final statusColor = _statusColor(item.status, cs);
             return SingleChildScrollView(
               padding: const EdgeInsets.all(20),
               child: Column(
@@ -88,9 +91,9 @@ class ItemDetailView extends GetView<ItemDetailController> {
                     width: double.infinity,
                     height: 220,
                     decoration: BoxDecoration(
-                      color: AppColors.primarySurface,
+                      color: cs.surface,
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: AppColors.border),
+                      border: Border.all(color: cs.onSurface.withOpacity(0.08)),
                     ),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(20),
@@ -98,7 +101,10 @@ class ItemDetailView extends GetView<ItemDetailController> {
                           ? Image.network(
                               item.imageUrl!,
                               fit: BoxFit.cover,
-                              errorBuilder: (_, __, ___) => const Center(child: Icon(Icons.broken_image_rounded, size: 42, color: AppColors.textHint)),
+                              errorBuilder: (_, __, ___) => Center(
+                                child: Icon(Icons.broken_image_rounded,
+                                    size: 42, color: cs.onSurface.withOpacity(0.65)),
+                              ),
                               loadingBuilder: (context, child, progress) {
                                 if (progress == null) return child;
                                 return const Center(child: CircularProgressIndicator());
@@ -107,12 +113,12 @@ class ItemDetailView extends GetView<ItemDetailController> {
                           : Center(
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
-                                children: const [
-                                  Icon(Icons.image_outlined, size: 42, color: AppColors.textHint),
-                                  SizedBox(height: 8),
+                                children: [
+                                  Icon(Icons.image_outlined, size: 42, color: cs.onSurface.withOpacity(0.65)),
+                                  const SizedBox(height: 8),
                                   Text(
                                     'Foto barang tidak tersedia',
-                                    style: TextStyle(color: AppColors.textHint),
+                                    style: TextStyle(color: cs.onSurface.withOpacity(0.65)),
                                   ),
                                 ],
                               ),
@@ -127,9 +133,16 @@ class ItemDetailView extends GetView<ItemDetailController> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(item.name, style: AppTextStyles.title),
+                            Text(item.name,
+                                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                      color: cs.onSurface,
+                                      fontWeight: FontWeight.w700,
+                                    )),
                             const SizedBox(height: 6),
-                            Text(item.qrCode, style: AppTextStyles.caption),
+                            Text(item.qrCode,
+                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: cs.onSurface.withOpacity(0.7),
+                                    )),
                           ],
                         ),
                       ),
@@ -138,9 +151,16 @@ class ItemDetailView extends GetView<ItemDetailController> {
                   ),
                   const SizedBox(height: 20),
                   if (item.description != null && item.description!.isNotEmpty) ...[
-                    Text('Deskripsi', style: AppTextStyles.label),
+                    Text('Deskripsi',
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              color: cs.onSurface,
+                              fontWeight: FontWeight.w700,
+                            )),
                     const SizedBox(height: 8),
-                    Text(item.description!, style: AppTextStyles.body),
+                    Text(item.description!,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: cs.onSurface.withOpacity(0.85),
+                            )),
                     const SizedBox(height: 18),
                   ],
                   _DetailRow(label: 'Kategori', value: item.category?.name ?? '-'),
@@ -184,9 +204,22 @@ class _DetailRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
     return Container(
       width: double.infinity,
-      decoration: AppDecoration.card,
+      decoration: BoxDecoration(
+        color: cs.surface,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: cs.onSurface.withOpacity(0.08)),
+        boxShadow: [
+          BoxShadow(
+            color: cs.onSurface.withOpacity(0.02),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
       padding: const EdgeInsets.all(14),
       child: Row(
         children: [
@@ -217,9 +250,9 @@ class _StatusChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
+        color: color.withOpacity(0.12),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withValues(alpha: 0.2)),
+        border: Border.all(color: color.withOpacity(0.2)),
       ),
       child: Text(
         label,

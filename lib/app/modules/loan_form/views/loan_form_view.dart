@@ -6,27 +6,36 @@ import '../../../theme/app_theme.dart';
 import '../../../routes/app_pages.dart';
 import '../controllers/loan_form_controller.dart';
 
+Color _statusAvailableColor(ColorScheme cs) {
+  return cs.secondary;
+}
+
+Color _statusOverdueColor(ColorScheme cs) {
+  return cs.error;
+}
+
 class LoanFormView extends GetView<LoanFormController> {
   const LoanFormView({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: cs.surface,
       appBar: AppBar(
-        backgroundColor: AppColors.surface,
+        backgroundColor: cs.surface,
         leading: IconButton(
-          icon: const Icon(
+          icon: Icon(
             Icons.arrow_back_ios_new_rounded,
             size: 20,
-            color: AppColors.primary,
+            color: cs.primary,
           ),
           onPressed: () => Get.back(),
         ),
         title: const Text('Ajukan Peminjaman'),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
-          child: Container(height: 1, color: AppColors.divider),
+          child: Container(height: 1, color: cs.onSurface.withValues(alpha: 0.08)),
         ),
       ),
       body: SingleChildScrollView(
@@ -42,11 +51,21 @@ class LoanFormView extends GetView<LoanFormController> {
               final status = item?.status ?? 'Available';
               final condition = item?.condition ?? 'Good';
               final statusColor = status.toLowerCase() == 'available'
-                  ? AppColors.statusAvailable
-                  : AppColors.statusOverdue;
-
+                              ? _statusAvailableColor(cs)
+                              : _statusOverdueColor(cs);
               return Container(
-                decoration: AppDecoration.card,
+                decoration: BoxDecoration(
+                  color: cs.surface,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: cs.onSurface.withValues(alpha: 0.06)),
+                  boxShadow: [
+                    BoxShadow(
+                      color: cs.primary.withValues(alpha: 0.03),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
                 padding: const EdgeInsets.all(16),
                 child: Row(
                   children: [
@@ -54,12 +73,12 @@ class LoanFormView extends GetView<LoanFormController> {
                       width: 52,
                       height: 52,
                       decoration: BoxDecoration(
-                        color: AppColors.primarySurface,
+                        color: cs.primaryContainer,
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.laptop_rounded,
-                        color: AppColors.primary,
+                        color: cs.primary,
                         size: 28,
                       ),
                     ),
@@ -133,8 +152,18 @@ class LoanFormView extends GetView<LoanFormController> {
             TextFormField(
               maxLines: 3,
               onChanged: controller.setNotes,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 hintText: 'Untuk keperluan rapat...',
+                filled: true,
+                fillColor: cs.surfaceContainerHighest,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: cs.onSurface.withValues(alpha: 0.12)),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: cs.onSurface.withValues(alpha: 0.12)),
+                ),
               ),
             ),
             const SizedBox(height: 20),
@@ -156,7 +185,7 @@ class LoanFormView extends GetView<LoanFormController> {
                           fit: BoxFit.cover,
                         ),
                         border: Border.all(
-                          color: AppColors.primary.withValues(alpha: 0.3),
+                          color: cs.primary.withValues(alpha: 0.3),
                           width: 1.5,
                         ),
                       ),
@@ -196,7 +225,7 @@ class LoanFormView extends GetView<LoanFormController> {
                             vertical: 6,
                           ),
                           decoration: BoxDecoration(
-                            color: AppColors.primary,
+                            color: cs.primary,
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Row(
@@ -246,8 +275,8 @@ class LoanFormView extends GetView<LoanFormController> {
                     ? () => controller.submitLoanRequest()
                     : null,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  disabledBackgroundColor: Colors.grey.shade300,
+                  backgroundColor: cs.primary,
+                  disabledBackgroundColor: cs.onSurface.withValues(alpha: 0.12),
                   minimumSize: const Size(double.infinity, 52),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
@@ -275,6 +304,10 @@ class LoanFormView extends GetView<LoanFormController> {
             const SizedBox(height: 12),
             OutlinedButton(
               onPressed: () => Get.back(),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: cs.onSurface,
+                side: BorderSide(color: cs.onSurface.withValues(alpha: 0.12)),
+              ),
               child: const Text('Batal'),
             ),
           ],
@@ -310,12 +343,15 @@ class _DateField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     final isClickable = onTap != null;
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        decoration: AppDecoration.inputField.copyWith(
-          color: isClickable ? null : Colors.grey.shade100,
+        decoration: BoxDecoration(
+          color: isClickable ? cs.surfaceContainerHighest : cs.surface,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: cs.onSurface.withValues(alpha: 0.12)),
         ),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
         child: Row(
@@ -323,27 +359,27 @@ class _DateField extends StatelessWidget {
             Icon(
               icon,
               size: 18,
-              color: isClickable ? AppColors.primary : AppColors.textHint,
+              color: isClickable ? cs.primary : cs.onSurface.withValues(alpha: 0.6),
             ),
             const SizedBox(width: 10),
             Text(
               value,
               style: AppTextStyles.body.copyWith(
-                color: isClickable ? null : AppColors.textSecondary,
+                color: isClickable ? cs.onSurface : cs.onSurface.withValues(alpha: 0.7),
               ),
             ),
             const Spacer(),
             if (isClickable)
-              const Icon(
+              Icon(
                 Icons.chevron_right_rounded,
                 size: 18,
-                color: AppColors.textHint,
+                color: cs.onSurface.withValues(alpha: 0.6),
               )
             else
-              const Icon(
+              Icon(
                 Icons.lock_outline_rounded,
                 size: 16,
-                color: AppColors.textHint,
+                color: cs.onSurface.withValues(alpha: 0.6),
               ),
           ],
         ),
@@ -359,15 +395,16 @@ class _PhotoPlaceholder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return GestureDetector(
       onTap: onTap,
       child: Container(
         height: 120,
         decoration: BoxDecoration(
-          color: AppColors.primarySurface,
+          color: cs.primaryContainer,
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
-            color: AppColors.primary.withValues(alpha: 0.3),
+            color: cs.primary.withValues(alpha: 0.3),
             width: 1.5,
           ),
         ),
@@ -377,12 +414,12 @@ class _PhotoPlaceholder extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.1),
+                color: cs.primary.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.camera_alt_rounded,
-                color: AppColors.primary,
+                color: cs.primary,
                 size: 28,
               ),
             ),
@@ -390,7 +427,7 @@ class _PhotoPlaceholder extends StatelessWidget {
             Text(
               label,
               style: AppTextStyles.caption.copyWith(
-                color: AppColors.primary,
+                color: cs.primary,
                 fontWeight: FontWeight.w600,
               ),
             ),

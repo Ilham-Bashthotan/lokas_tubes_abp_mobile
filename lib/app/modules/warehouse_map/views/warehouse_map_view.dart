@@ -11,28 +11,29 @@ class WarehouseMapView extends GetView<WarehouseMapController> {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: cs.surface,
       body: CustomScrollView(
         slivers: [
           // App Bar
           SliverAppBar(
             pinned: true,
-            backgroundColor: AppColors.surface,
+            backgroundColor: cs.surface,
             expandedHeight: 60,
             elevation: 0,
             leading: IconButton(
-              icon: const Icon(
+              icon: Icon(
                 Icons.arrow_back_ios_new_rounded,
                 size: 20,
-                color: AppColors.primary,
+                color: cs.primary,
               ),
               onPressed: () => Get.back(),
             ),
             title: const Text('Lokasi Gudang'),
             bottom: PreferredSize(
               preferredSize: const Size.fromHeight(1),
-              child: Container(height: 1, color: AppColors.divider),
+              child: Container(height: 1, color: cs.onSurface.withValues(alpha: 0.08)),
             ),
           ),
 
@@ -49,25 +50,30 @@ class WarehouseMapView extends GetView<WarehouseMapController> {
                       Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: AppColors.primary.withValues(alpha: 0.1),
+                          color: cs.primary.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        child: const Icon(
+                        child: Icon(
                           Icons.map_rounded,
-                          color: AppColors.primary,
+                          color: cs.primary,
                           size: 22,
                         ),
                       ),
                       const SizedBox(width: 12),
-                      const Expanded(
+                      Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Lokasi Gudang', style: AppTextStyles.title),
-                            SizedBox(height: 2),
+                            Text(
+                              'Lokasi Gudang',
+                              style: AppTextStyles.title.copyWith(color: cs.onSurface),
+                            ),
+                            const SizedBox(height: 2),
                             Text(
                               'Peta interaktif gudang penyimpanan',
-                              style: AppTextStyles.caption,
+                              style: AppTextStyles.caption.copyWith(
+                                color: cs.onSurface.withValues(alpha: 0.6),
+                              ),
                             ),
                           ],
                         ),
@@ -81,10 +87,10 @@ class WarehouseMapView extends GetView<WarehouseMapController> {
                     height: 300,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: AppColors.border),
+                      border: Border.all(color: cs.onSurface.withValues(alpha: 0.12)),
                       boxShadow: [
                         BoxShadow(
-                          color: AppColors.primary.withValues(alpha: 0.06),
+                          color: cs.primary.withValues(alpha: 0.06),
                           blurRadius: 8,
                           offset: const Offset(0, 4),
                         ),
@@ -94,7 +100,7 @@ class WarehouseMapView extends GetView<WarehouseMapController> {
                     child: Stack(
                       children: [
                         // Map
-                        _buildMap(),
+                        _buildMap(cs),
 
                         // Zoom controls
                         Positioned(
@@ -133,11 +139,11 @@ class WarehouseMapView extends GetView<WarehouseMapController> {
                                   vertical: 6,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: AppColors.surface,
+                                  color: cs.surfaceContainerHighest,
                                   borderRadius: BorderRadius.circular(8),
-                                  border: Border.all(color: AppColors.border),
+                                  border: Border.all(color: cs.onSurface.withValues(alpha: 0.12)),
                                 ),
-                                child: const Row(
+                                child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     SizedBox(
@@ -145,15 +151,15 @@ class WarehouseMapView extends GetView<WarehouseMapController> {
                                       height: 14,
                                       child: CircularProgressIndicator(
                                         strokeWidth: 2,
-                                        color: AppColors.primary,
+                                        color: cs.primary,
                                       ),
                                     ),
-                                    SizedBox(width: 6),
+                                    const SizedBox(width: 6),
                                     Text(
                                       'Mencari lokasi...',
                                       style: TextStyle(
                                         fontSize: 11,
-                                        color: AppColors.textSecondary,
+                                        color: cs.onSurface.withValues(alpha: 0.7),
                                       ),
                                     ),
                                   ],
@@ -181,7 +187,7 @@ class WarehouseMapView extends GetView<WarehouseMapController> {
                           label: 'Gudang',
                           value: '$warehousesCount',
                           icon: Icons.warehouse_rounded,
-                          color: AppColors.primary,
+                          color: cs.primary,
                         ),
                         const SizedBox(width: 10),
                         _StatBox(
@@ -190,16 +196,14 @@ class WarehouseMapView extends GetView<WarehouseMapController> {
                               ? '${controller.getDistanceString(nearestWarehouse)} km'
                               : '— km',
                           icon: Icons.near_me_rounded,
-                          color: AppColors.statusPending,
+                          color: cs.secondary,
                         ),
                         const SizedBox(width: 10),
                         _StatBox(
                           label: 'Posisi',
                           value: user != null ? 'Aktif' : 'Off',
                           icon: Icons.gps_fixed_rounded,
-                          color: user != null
-                              ? AppColors.statusAvailable
-                              : AppColors.statusOverdue,
+                          color: user != null ? cs.secondary : cs.error,
                         ),
                       ],
                     );
@@ -207,7 +211,8 @@ class WarehouseMapView extends GetView<WarehouseMapController> {
                   const SizedBox(height: 20),
 
                   // Warehouse List Section
-                  const Text('Daftar Gudang', style: AppTextStyles.subtitle),
+                  Text('Daftar Gudang',
+                      style: AppTextStyles.subtitle.copyWith(color: cs.onSurface)),
                   const SizedBox(height: 10),
 
                   // Warehouse cards
@@ -224,19 +229,19 @@ class WarehouseMapView extends GetView<WarehouseMapController> {
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         child: Text(
                           controller.warehousesError.value!,
-                          style: const TextStyle(
-                            color: AppColors.textSecondary,
+                          style: TextStyle(
+                            color: cs.onSurface.withValues(alpha: 0.7),
                           ),
                         ),
                       );
                     }
 
                     if (controller.warehouses.isEmpty) {
-                      return const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 12),
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
                         child: Text(
                           'Belum ada data gudang.',
-                          style: TextStyle(color: AppColors.textSecondary),
+                          style: TextStyle(color: cs.onSurface.withValues(alpha: 0.7)),
                         ),
                       );
                     }
@@ -275,18 +280,18 @@ class WarehouseMapView extends GetView<WarehouseMapController> {
   // ═══════════════════════════════════════════════════════════
   //  MAP WIDGET
   // ═══════════════════════════════════════════════════════════
-  Widget _buildMap() {
+  Widget _buildMap(ColorScheme cs) {
     return Obx(() {
       final user = controller.userPosition.value;
       final warehouses = controller.warehouses;
 
       if (warehouses.isEmpty) {
         return Container(
-          color: AppColors.background,
+          color: cs.surface,
           alignment: Alignment.center,
-          child: const Text(
+          child: Text(
             'Data gudang belum tersedia',
-            style: TextStyle(color: AppColors.textSecondary),
+            style: TextStyle(color: cs.onSurface.withValues(alpha: 0.6)),
           ),
         );
       }
@@ -296,7 +301,7 @@ class WarehouseMapView extends GetView<WarehouseMapController> {
         options: MapOptions(
           initialCenter: warehouses.first.position,
           initialZoom: controller.zoomLevel.value,
-          backgroundColor: AppColors.background,
+          backgroundColor: cs.surface,
         ),
         children: [
           // Tile layer (standard OpenStreetMap)
@@ -361,6 +366,7 @@ class _StatBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Expanded(
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 10),
@@ -385,9 +391,9 @@ class _StatBox extends StatelessWidget {
             Text(
               label,
               textAlign: TextAlign.center,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 10,
-                color: AppColors.textSecondary,
+                color: cs.onSurface.withValues(alpha: 0.6),
               ),
             ),
           ],
@@ -411,16 +417,17 @@ class _MapBtn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return GestureDetector(
       onTap: onTap,
       child: Container(
         width: 36,
         height: 36,
         decoration: BoxDecoration(
-          color: isPrimary ? AppColors.primary : AppColors.surface,
+          color: isPrimary ? cs.primary : cs.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: isPrimary ? AppColors.primary : AppColors.border,
+            color: isPrimary ? cs.primary : cs.onSurface.withValues(alpha: 0.12),
           ),
           boxShadow: [
             BoxShadow(
@@ -432,7 +439,7 @@ class _MapBtn extends StatelessWidget {
         ),
         child: Icon(
           icon,
-          color: isPrimary ? Colors.white : AppColors.textPrimary,
+          color: isPrimary ? Colors.white : cs.onSurface,
           size: 18,
         ),
       ),
@@ -449,6 +456,7 @@ class _WarehouseMarker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -456,12 +464,12 @@ class _WarehouseMarker extends StatelessWidget {
           width: isSelected ? 36 : 28,
           height: isSelected ? 36 : 28,
           decoration: BoxDecoration(
-            color: isSelected ? AppColors.primary : AppColors.primaryLight,
+            color: isSelected ? cs.primary : cs.primaryContainer,
             borderRadius: BorderRadius.circular(8),
             border: Border.all(color: Colors.white, width: 2),
             boxShadow: [
               BoxShadow(
-                color: AppColors.primary.withValues(alpha: 0.3),
+                color: cs.primary.withValues(alpha: 0.3),
                 blurRadius: isSelected ? 10 : 4,
                 spreadRadius: isSelected ? 1 : 0,
               ),
@@ -478,7 +486,7 @@ class _WarehouseMarker extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
             decoration: BoxDecoration(
-              color: AppColors.primary,
+              color: cs.primary,
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(
@@ -598,25 +606,26 @@ class _WarehouseCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return GestureDetector(
       onTap: onTap,
       child: Container(
         margin: const EdgeInsets.only(bottom: 10),
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: cs.surface,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
             color: isSelected
-                ? AppColors.primary.withValues(alpha: 0.5)
-                : AppColors.border,
+                ? cs.primary.withValues(alpha: 0.5)
+                : cs.onSurface.withValues(alpha: 0.12),
             width: isSelected ? 1.5 : 1,
           ),
           boxShadow: [
             BoxShadow(
               color: isSelected
-                  ? AppColors.primary.withValues(alpha: 0.08)
-                  : AppColors.primary.withValues(alpha: 0.04),
+                  ? cs.primary.withValues(alpha: 0.08)
+                  : cs.primary.withValues(alpha: 0.04),
               blurRadius: 8,
               offset: const Offset(0, 4),
             ),
@@ -632,15 +641,13 @@ class _WarehouseCard extends StatelessWidget {
                   height: 44,
                   decoration: BoxDecoration(
                     color: isSelected
-                        ? AppColors.primary.withValues(alpha: 0.12)
-                        : AppColors.primarySurface,
+                        ? cs.primary.withValues(alpha: 0.12)
+                        : cs.primaryContainer,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(
                     Icons.warehouse_rounded,
-                    color: isSelected
-                        ? AppColors.primary
-                        : AppColors.primaryLight,
+                    color: cs.primary,
                     size: 22,
                   ),
                 ),
@@ -650,9 +657,17 @@ class _WarehouseCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(warehouse.name, style: AppTextStyles.subtitle),
+                      Text(
+                        warehouse.name,
+                        style: AppTextStyles.subtitle.copyWith(color: cs.onSurface),
+                      ),
                       const SizedBox(height: 2),
-                      Text(warehouse.address, style: AppTextStyles.caption),
+                      Text(
+                        warehouse.address,
+                        style: AppTextStyles.caption.copyWith(
+                          color: cs.onSurface.withValues(alpha: 0.7),
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -663,18 +678,18 @@ class _WarehouseCard extends StatelessWidget {
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.1),
+                    color: cs.primary.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
-                      color: AppColors.primary.withValues(alpha: 0.2),
+                      color: cs.primary.withValues(alpha: 0.2),
                     ),
                   ),
                   child: Text(
                     '$distance km',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w700,
-                      color: AppColors.primary,
+                      color: cs.primary,
                     ),
                   ),
                 ),
@@ -686,11 +701,11 @@ class _WarehouseCard extends StatelessWidget {
               width: double.infinity,
               child: OutlinedButton.icon(
                 onPressed: onNavigate,
-                icon: const Icon(Icons.navigation_rounded, size: 16),
-                label: const Text('Buka di Google Maps'),
+                icon: Icon(Icons.navigation_rounded, size: 16, color: cs.primary),
+                label: Text('Buka di Google Maps', style: TextStyle(color: cs.primary)),
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: AppColors.primary,
-                  side: const BorderSide(color: AppColors.border),
+                  foregroundColor: cs.primary,
+                  side: BorderSide(color: cs.onSurface.withValues(alpha: 0.12)),
                   minimumSize: const Size(0, 40),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),

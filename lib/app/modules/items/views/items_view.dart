@@ -7,6 +7,34 @@ import '../../../theme/app_theme.dart';
 import '../../../widgets/app_bottom_nav.dart';
 import '../controllers/items_controller.dart';
 
+bool _isDarkMode(BuildContext context) {
+  return Theme.of(context).brightness == Brightness.dark;
+}
+
+Color _statusAvailableColor(BuildContext context) {
+  return _isDarkMode(context)
+      ? AppColorsDark.statusAvailable
+      : AppColors.statusAvailable;
+}
+
+Color _statusBorrowedColor(BuildContext context) {
+  return _isDarkMode(context)
+      ? AppColorsDark.statusBorrowed
+      : AppColors.statusPending;
+}
+
+Color _statusMaintenanceColor(BuildContext context) {
+  return _isDarkMode(context)
+      ? AppColorsDark.statusOverdue
+      : AppColors.statusOverdue;
+}
+
+Color _statusTextHintColor(BuildContext context) {
+  return _isDarkMode(context)
+      ? AppColorsDark.textHint
+      : AppColors.textHint;
+}
+
 class ItemsView extends GetView<ItemsController> {
   const ItemsView({super.key});
 
@@ -17,30 +45,31 @@ class ItemsView extends GetView<ItemsController> {
     {'value': 'maintenance', 'label': 'Maintenance'},
   ];
 
-  Color _statusColor(String status) {
+  Color _statusColor(String status, BuildContext context) {
     switch (status) {
       case 'available':
-        return AppColors.statusAvailable;
+        return _statusAvailableColor(context);
       case 'borrowed':
-        return AppColors.statusPending;
+        return _statusBorrowedColor(context);
       case 'maintenance':
-        return AppColors.statusOverdue;
+        return _statusMaintenanceColor(context);
       default:
-        return AppColors.textHint;
+        return _statusTextHintColor(context);
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: cs.surface,
       appBar: AppBar(
-        backgroundColor: AppColors.surface,
+        backgroundColor: cs.surface,
         title: const Text('Daftar Barang'),
         automaticallyImplyLeading: false,
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
-          child: Container(height: 1, color: AppColors.divider),
+          child: Container(height: 1, color: cs.onSurface.withValues(alpha: 0.08)),
         ),
       ),
       body: SafeArea(
@@ -63,15 +92,19 @@ class ItemsView extends GetView<ItemsController> {
                   padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
                   child: TextField(
                     onChanged: controller.onSearchChanged,
-                    cursorColor: AppColors.primary,
+                    cursorColor: cs.primary,
                     decoration: InputDecoration(
                       hintText: 'Cari nama / QR code...',
                       prefixIcon: const Icon(Icons.search_rounded),
                       filled: true,
-                      fillColor: AppColors.cardBg,
+                      fillColor: cs.surfaceContainerHighest,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(14),
-                        borderSide: const BorderSide(color: AppColors.border),
+                        borderSide: BorderSide(color: cs.onSurface.withValues(alpha: 0.12)),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(14),
+                        borderSide: BorderSide(color: cs.onSurface.withValues(alpha: 0.12)),
                       ),
                     ),
                   ),
@@ -107,7 +140,7 @@ class ItemsView extends GetView<ItemsController> {
                         final item = controller.items[index];
                         return _ItemCard(
                           item: item,
-                          statusColor: _statusColor(item.status),
+                          statusColor: _statusColor(item.status, context),
                         );
                       },
                     ),
@@ -131,18 +164,22 @@ class _ErrorState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Center(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('Terjadi kesalahan', style: AppTextStyles.subtitle),
+            Text(
+              'Terjadi kesalahan',
+              style: AppTextStyles.subtitle.copyWith(color: cs.onSurface),
+            ),
             const SizedBox(height: 10),
             Text(
               message,
               textAlign: TextAlign.center,
-              style: AppTextStyles.body,
+              style: AppTextStyles.body.copyWith(color: cs.onSurface.withValues(alpha: 0.8)),
             ),
             const SizedBox(height: 20),
             ElevatedButton(
@@ -169,15 +206,16 @@ class _FilterChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
-          color: active ? AppColors.primary.withValues(alpha: 0.12) : AppColors.surface,
+          color: active ? cs.primary.withValues(alpha: 0.12) : cs.surface,
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
-            color: active ? AppColors.primary : AppColors.border,
+            color: active ? cs.primary : cs.onSurface.withValues(alpha: 0.12),
           ),
         ),
         child: Text(
@@ -185,7 +223,7 @@ class _FilterChip extends StatelessWidget {
           style: TextStyle(
             fontSize: 12,
             fontWeight: active ? FontWeight.w700 : FontWeight.w600,
-            color: active ? AppColors.primary : AppColors.textSecondary,
+            color: active ? cs.primary : cs.onSurface.withValues(alpha: 0.72),
           ),
         ),
       ),
@@ -201,10 +239,22 @@ class _ItemCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return GestureDetector(
       onTap: () => Get.toNamed(Routes.ITEM_DETAIL, arguments: item.id),
       child: Container(
-        decoration: AppDecoration.card,
+        decoration: BoxDecoration(
+          color: cs.surface,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: cs.onSurface.withValues(alpha: 0.06)),
+          boxShadow: [
+            BoxShadow(
+              color: cs.primary.withValues(alpha: 0.03),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
         padding: const EdgeInsets.all(16),
         child: Row(
           children: [
@@ -225,11 +275,16 @@ class _ItemCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(item.name, style: AppTextStyles.subtitle),
+                  Text(
+                    item.name,
+                    style: AppTextStyles.subtitle.copyWith(color: cs.onSurface),
+                  ),
                   const SizedBox(height: 4),
                   Text(
                     '${item.warehouse?.name ?? 'Gudang'} · ${item.status.capitalizeFirst}',
-                    style: AppTextStyles.caption,
+                    style: AppTextStyles.caption.copyWith(
+                      color: cs.onSurface.withValues(alpha: 0.6),
+                    ),
                   ),
                 ],
               ),
